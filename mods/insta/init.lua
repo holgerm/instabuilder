@@ -8,43 +8,40 @@ insta = {
 
 -- #################### INTRO FORM ####################
 
-local function showIntroForm_DE(player)
+local function start_countdown()
+    local players = minetest.get_connected_players()
+
+    local function on_end(player)
+        minetest.debug("Countdown ended for player: " .. player:get_player_name())
+    end
+
+    local function on_warn(player)
+        minetest.debug("Countdown warning for player: " .. player:get_player_name())
+        _G.countdown.set_color(0xFF22AA) -- set text to red
+    end
+
+    _G.countdown.start(players[1], "Verbleibende Zeit: ", 420, on_end, 60, on_warn)
+end
+
+local function showIntroForm_DE(player, image)
     local formspec = {
         "formspec_version[4]",
         "size[20,13]",
-        "image_button[0.5,0.5;19,12;IntroGraphic.jpg;start;]",
-        --"image_button[0.5,13.5;3,1;toEnglish.png;lang;]",
-        --"button_exit[16.5,13.5;3,1;start;Los geht's]",
+        "image_button[0.5,0.5;19,12;"..image..";start;]",
     }
 
     minetest.show_formspec(player:get_player_name(), "insta:welcomeDE", table.concat(formspec, ""))
 end
 
-local function showIntroForm_EN(player)
-    local formspec = {
-        "formspec_version[4]",
-        "size[20,15]",
-        "image_button[0.5,0.5;19,12.5;IntroGraphic.jpg;start;]",
-        "image_button[0.5,13.5;3,1;toGerman.png;lang;]",
-        "button_exit[16.5,13.5;3,1;start;Start Game]",
-    }
-
-    minetest.show_formspec(player:get_player_name(), "insta:welcomeEN", table.concat(formspec, ""))
-end
-
 minetest.register_on_joinplayer(function(player)
     print("insta:register_on_joinplayer()")
-    showIntroForm_DE(player)
+    showIntroForm_DE(player, "IntroGraphic.jpg")
 end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-    if (formname == "insta:welcomeDE" or formname == "insta:welcomeEN") and fields.start then
-        minetest.debug("Game should start now")
+    if (formname == "insta:welcomeDE") and fields.start then
+        start_countdown()
         minetest.show_formspec(player:get_player_name(), formname, "")
-    elseif formname == "insta:welcomeDE" and fields.lang then
-        showIntroForm_EN(player)
-    elseif formname == "insta:welcomeEN" and fields.lang then
-        showIntroForm_DE(player)
     end
 end)
 
@@ -110,3 +107,5 @@ minetest.register_on_dignode(function(pos, oldnode, digger)
     -- This code will be executed whenever a player digs a node
     print(digger:get_player_name() .. " dug a " .. oldnode.name .. " at " .. minetest.pos_to_string(pos))
 end)
+
+
