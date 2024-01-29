@@ -106,7 +106,8 @@ function city.register_building(name, def)
             height = def.height,
         },
         node_placement_prediction = "",
-        tiles = city.load_material("city", def.mesh..".mtl")
+        tiles = city.load_material("city", def.mesh..".mtl"),
+        level = def.level,
     }
 
     def.height = def.height or 1
@@ -227,3 +228,8 @@ city.register_building("city:mall_c", {height = 1, mesh = "city_mall_c", kind = 
 city.register_building("city:mall_d", {height = 1, mesh = "city_mall_d", kind = "mall"})
 city.register_building("city:mall_e", {height = 1, mesh = "city_mall_e", kind = "mall"})
 city.register_building("city:mall_f", {height = 1, mesh = "city_mall_f", kind = "mall", width = 2})
+
+city.register_building("city:residential_1", {height = 0.6, mesh = "city_residential_1", kind = "residential", level = 1})
+city.register_building("city:residential_2", {height = 0.8, mesh = "city_residential_2", kind = "residential", level = 2})
+city.register_building("city:residential_3", {height = 1, mesh = "city_residential_3", kind = "residential", level = 3})
+city.register_building("city:residential_4", {height = 2, mesh = "city_residential_4", kind = "residential", level = 4})

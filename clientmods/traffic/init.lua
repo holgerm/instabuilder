@@ -1,3 +1,5 @@
+print("Init clientmods/traffic/init.lua")
+
 local cars = {}
 
 minetest.register_on_punchnode(function (pos, node, puncher)
@@ -25,6 +27,6 @@ minetest.register_globalstep(function (dtime)
         end
 
         cars[i].last_update = cars[i].last_update + dtime
-       
+
     end]]--
 end)

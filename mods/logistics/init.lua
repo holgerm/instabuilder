@@ -1,3 +1,5 @@
+print("Init mods/logistics/init.lua")
+
 --[[
     Logistics mod is a helper for creating and managing 
     solid-state logistic networks.   
@@ -162,6 +164,8 @@ logistics.place = function(name, pos, player)
         error("node must be registered with a connects_to string")
     end
 
+    minetest.debug("Connect_to: " .. def.connects_to)
+
     local group = string.match(def.connects_to, "group:(.*)")
     local network = def.logistics.network
 
@@ -204,6 +208,9 @@ logistics.place = function(name, pos, player)
     local param2 = minetest.dir_to_facedir(dir)
 
     minetest.set_node(pos, {name=name, param2=param2})
+    minetest.debug("Set node: " .. name .. " at " .. minetest.pos_to_string(pos))
+    minetest.debug(debug.traceback())
+
     logistics_set_index(pos, index)
 
     if logistics.registered_rails[name] then

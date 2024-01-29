@@ -1,4 +1,23 @@
-# Builda City™
+# Insta Builder
+
+## TODOs
+
+- Highscore
+- Screenshot per Scripts und Eintrag im Highscore
+  
+
+## Building Rules
+
+- residential building
+  - detached one-family house
+  - row house (non-detached)
+  - townhouse (3 storeys)
+  - high townhouse (5 storeys)
+  - residential tower (8 storeys)
+  - add 5 storeys (up to a limit depending on material)
+
+
+  
 
 A multiplayer city-building game running on the Minetest Engine.
 

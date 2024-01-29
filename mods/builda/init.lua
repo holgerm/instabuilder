@@ -1,3 +1,5 @@
+print("Init mods/builda/init.lua")
+
 --builda implements the gameplay logic of Builda City.
 --In this gamemode, players have energy and are required to build
 --cities so that they can collect coins and profit from the global
@@ -5,12 +7,12 @@
 
 local S = minetest.get_translator("builda")
 
-local coins_count = 1;
-local energy_count = 2;
+local hud_id_money
+local hud_id_co2
 
 local AddPlayerEnergy = function(player, energy)
     player:get_meta():set_float("energy", player:get_meta():get_float("energy")+energy)
-    player:hud_change(energy_count, "text", math.floor(0.5+player:get_meta():get_float("energy")))
+    player:hud_change(hud_id_co2, "text", math.floor(0.5+player:get_meta():get_float("energy")))
 end
 
 --returns true if the player can afford.
@@ -20,7 +22,7 @@ local AddPlayerCoins = function(player, coins)
         player:get_meta():set_int("coins", player:get_meta():get_int("coins")-coins)
         return false
     end
-    player:hud_change(coins_count, "text", player:get_meta():get_int("coins"))
+    player:hud_change(hud_id_money, "text", player:get_meta():get_int("coins"))
     return true
 end
 
@@ -149,11 +151,8 @@ minetest.register_on_joinplayer(function(player)
     local list = {
         "builda:info 1",
         "builda:road 1",
-        "builda:house 1",
-        "builda:shop 1",
-        "builda:mall 1",
-        "builda:skyscraper 1",
-        "builda:destroyer 1", 
+        "builda:residential 1",
+        "builda:destroyer 1",
     }
 
     --Initialise the buildbar (hotbar).
@@ -168,43 +167,83 @@ minetest.register_on_joinplayer(function(player)
     player:hud_add({
         hud_elem_type = "statbar",
         position = {x=1, y=0},
-        text = "builda_coin.png",
+        text = "cost.png",
         number = 2,
         size = {x=64, y=64},
-        offset = {x=-64-10, y=0},
+        offset = {x=-64-10, y=5},
     })
     --Brain Count
-    player:hud_add({
+    hud_id_money = player:hud_add({
         name = "coins",
         hud_elem_type = "text",
         position = {x=1, y=0},
         text = player:get_meta():get_int("coins"),
         number = 0xffffff,
         size = {x=3, y=3},
-        offset = {x=-90, y=5},
+        offset = {x=-90, y=10},
         alignment = {x=-1, y=1},
     })
     --Energy Count
-    player:hud_add({
+    hud_id_co2 = player:hud_add({
         name = "energy",
         hud_elem_type = "text",
         position = {x=1, y=0},
         text = math.floor(player:get_meta():get_float("energy")+0.5),
         number = 0xffffff,
-        size = {x=3, y=3},
-        offset = {x=-80, y=64+5},
+        size = {x=3, y=3+5},
+        offset = {x=-90, y=64+5},
         alignment = {x=-1, y=1},
     })
     --Energy Icon
     player:hud_add({
         hud_elem_type = "statbar",
         position = {x=1, y=0},
-        text = "builda_energy.png",
+        text = "co2.png",
         number = 2,
-        size = {x=48, y=48},
+        size = {x=48, y=48+5},
         offset = {x=-64, y=64+7},
     })
-    
+    -- Population Count
+    player:hud_add({
+        name = "population",
+        hud_elem_type = "text",
+        position = {x=1, y=0},
+        text = math.floor(player:get_meta():get_float("energy")+0.5),
+        number = 0xffffff,
+        size = {x=3, y=3+5},
+        offset = {x=-90, y=64+5+64},
+        alignment = {x=-1, y=1},
+    })
+    -- Population Icon
+    player:hud_add({
+        hud_elem_type = "statbar",
+        position = {x=1, y=0},
+        text = "population.png",
+        number = 2,
+        size = {x=48, y=48+5},
+        offset = {x=-64, y=64+7+64},
+    })
+    -- Duration Count
+    player:hud_add({
+        name = "duration",
+        hud_elem_type = "text",
+        position = {x=1, y=0},
+        text = math.floor(player:get_meta():get_float("energy")+0.5),
+        number = 0xffffff,
+        size = {x=3, y=3+5},
+        offset = {x=-90, y=64+5+64+64},
+        alignment = {x=-1, y=1},
+    })
+    -- Duration Icon
+    player:hud_add({
+        hud_elem_type = "statbar",
+        position = {x=1, y=0},
+        text = "duration.png",
+        number = 2,
+        size = {x=48, y=48+5},
+        offset = {x=-64, y=64+7+64+64},
+    })
+
 
     --Setup camera, the player is inside an energy distrubution craft
     --and is able to fly through single-node spaces.
@@ -220,7 +259,6 @@ minetest.register_on_joinplayer(function(player)
     local privs = minetest.get_player_privs(name)
     privs.fly = true
     minetest.set_player_privs(name, privs)
-    
 end)
 
 
@@ -342,12 +380,12 @@ minetest.register_item("builda:road", {
     inventory_image = "builda_road.png",
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
+        _G.worksaver.update_area(pointed_thing.above)
+        _G.worksaver.print_area()
         if pointed_thing.type == "node" then
-            if pointed_thing.type == "node" then
-                if PlayerCanAfford(user, 1) and logistics.place("city:street_off", pointed_thing.above, user) then
-                    AddPlayerCoins(user, -1)
-                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-                end
+            if PlayerCanAfford(user, 1) and logistics.place("city:street_off", pointed_thing.above, user) then
+                AddPlayerCoins(user, -1)
+                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end
@@ -390,10 +428,29 @@ minetest.register_item("builda:mall", {
     inventory_image = "builda_mall.png",
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
+        print("builda:mall.on_place()")
         if pointed_thing.type == "node" then
             if PlayerCanAfford(user, 5) then
                 if city.build("mall", pointed_thing.above, user) then
                     AddPlayerCoins(user, -5)
+                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
+                end
+            end
+        end
+    end
+})
+
+minetest.register_item("builda:residential", {
+    description = S("Residential"),
+    inventory_image = "builda_residential.png",
+    type = "tool",
+    on_place = function(itemstack, user, pointed_thing)
+        print("builda:residential.on_place() at " .. minetest.pos_to_string(pointed_thing.above))
+        print("on_place() pointed_thing: "..minetest.serialize(pointed_thing))
+        if pointed_thing.type == "node" then
+            if PlayerCanAfford(user, 1) then
+                if insta.build_residential(pointed_thing, user) then
+                    AddPlayerCoins(user, -1)
                     minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
                 end
             end
