@@ -1,5 +1,7 @@
 print("Init mods/builda/init.lua")
 
+dofile(minetest.get_modpath("insta").."/countdown.lua")
+
 --builda implements the gameplay logic of Builda City.
 --In this gamemode, players have energy and are required to build
 --cities so that they can collect coins and profit from the global
