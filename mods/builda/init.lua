@@ -461,7 +461,19 @@ minetest.register_item("builda:residential_concrete", {
                 end
             end
         end
+    end,
+    on_use = function(itemstack, user, pointed_thing)
+        minetest.debug("on_use: node type: " .. pointed_thing.type)
+        if pointed_thing.type == "node" then
+            if insta.unbuild_residential_concrete(pointed_thing, user) then
+                AddPlayerCoins(user, 1)
+                AddPlayerPopulation(user, -13)
+                AddPlayerCO2(user, -70)
+                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
+            end
+        end
     end
+
 })
 
 minetest.register_item("builda:residential_wood", {
@@ -475,6 +487,18 @@ minetest.register_item("builda:residential_wood", {
                     AddPlayerCoins(user, -1)
                     AddPlayerPopulation(user, 6)
                     AddPlayerCO2(user, 20)
+                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
+                end
+            end
+        end
+    end,
+    on_use = function(itemstack, user, pointed_thing)
+        if pointed_thing.type == "node" then
+            if PlayerCanAfford(user, 1) then
+                if insta.unbuild_residential_wood(pointed_thing, user) then
+                    AddPlayerCoins(user, 1)
+                    AddPlayerPopulation(user, -6)
+                    AddPlayerCO2(user, -20)
                     minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
                 end
             end

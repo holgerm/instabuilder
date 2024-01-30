@@ -274,7 +274,6 @@ logistics.remove = function(pos, player)
     minetest.remove_node(pos)
     logistics.update(pos)
 
-    
     return true
 end
 

@@ -95,6 +95,31 @@ function insta.build_residential_concrete(pointed_thing, builder)
     end
 end
 
+function insta.unbuild_residential_concrete(pointed_thing, builder)
+    local pos = pointed_thing.above
+    -- in case we have abuilding we pointed too high and adjust it here
+    if pos.y > 9 then
+        pos = pointed_thing.under
+    end
+    local current = minetest.get_node(pos)
+
+    -- level 1 on plain ground only if street is nearby:
+    if current.name == "air" then
+        return false
+    end
+
+    -- level is 2 or higher on plain ground only if street is nearby:
+    local building_type = "residential_concrete"
+    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_concrete_n")]
+    if current.name:sub(1,#"city:residential_concrete") == "city:residential_concrete" and item_def.level then
+        if item_def.level > 1 then
+            return logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, builder)
+        elseif item_def.level == 1 then
+            return logistics.remove(pos, builder)
+        end
+    end
+end
+
 function insta.build_residential_wood(pointed_thing, builder)
     local pos = pointed_thing.above
     -- in case we have abuilding we pointed too high and adjust it here
@@ -113,8 +138,6 @@ function insta.build_residential_wood(pointed_thing, builder)
             return logistics.place(city.buildings["residential_wood"][1].."_off", pos, builder)
         end
     end
-
-
     -- level is 2 or higher on plain ground only if street is nearby:
     local building_type = "residential_wood"
     local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_wood_n")]
@@ -123,6 +146,31 @@ function insta.build_residential_wood(pointed_thing, builder)
     end
 end
 
+
+function insta.unbuild_residential_wood(pointed_thing, builder)
+    local pos = pointed_thing.above
+    -- in case we have abuilding we pointed too high and adjust it here
+    if pos.y > 9 then
+        pos = pointed_thing.under
+    end
+    local current = minetest.get_node(pos)
+
+    -- level 1 on plain ground only if street is nearby:
+    if current.name == "air" then
+        return false
+    end
+
+    -- level is 2 or higher on plain ground only if street is nearby:
+    local building_type = "residential_wood"
+    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_wood_n")]
+    if current.name:sub(1,#"city:residential_wood") == "city:residential_wood" and item_def.level then
+        if item_def.level > 1 then
+            return logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, builder)
+        elseif item_def.level == 1 then
+            return logistics.remove(pos, builder)
+        end
+    end
+end
 
 
 -- ################# GATHERING THE AREA WORKED ON #################
