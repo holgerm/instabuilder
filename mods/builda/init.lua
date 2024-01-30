@@ -11,6 +11,7 @@ local S = minetest.get_translator("builda")
 
 local hud_id_money
 local hud_id_co2
+local hud_id_population
 
 local AddPlayerEnergy = function(player, energy)
     player:get_meta():set_float("energy", player:get_meta():get_float("energy")+energy)
@@ -27,6 +28,27 @@ local AddPlayerCoins = function(player, coins)
     player:hud_change(hud_id_money, "text", player:get_meta():get_int("coins"))
     return true
 end
+
+local AddPlayerPopulation = function(player, coins)
+    player:get_meta():set_int("population", player:get_meta():get_int("population") + coins);
+    if player:get_meta():get_int("population") < 0 then
+        player:get_meta():set_int("population", player:get_meta():get_int("population")-coins)
+        return false
+    end
+    player:hud_change(hud_id_population, "text", player:get_meta():get_int("population"))
+    return true
+end
+
+local AddPlayerCO2 = function(player, coins)
+    player:get_meta():set_int("co2", player:get_meta():get_int("co2") + coins);
+    if player:get_meta():get_int("co2") < 0 then
+        player:get_meta():set_int("co2", player:get_meta():get_int("co2")-coins)
+        return false
+    end
+    player:hud_change(hud_id_co2, "text", player:get_meta():get_int("co2"))
+    return true
+end
+
 
 local PlayerCanAfford = function(player, coins)
     return player:get_meta():get_int("coins") >= coins
@@ -153,7 +175,8 @@ minetest.register_on_joinplayer(function(player)
     local list = {
         "builda:info 1",
         "builda:road 1",
-        "builda:residential 1",
+        "builda:residential_concrete 1",
+        "builda:residential_wood 1",
         "builda:destroyer 1",
     }
 
@@ -187,10 +210,10 @@ minetest.register_on_joinplayer(function(player)
     })
     --Energy Count
     hud_id_co2 = player:hud_add({
-        name = "energy",
+        name = "co2",
         hud_elem_type = "text",
         position = {x=1, y=0},
-        text = math.floor(player:get_meta():get_float("energy")+0.5),
+        text = math.floor(player:get_meta():get_float("co2")+0.5),
         number = 0xffffff,
         size = {x=3, y=3+5},
         offset = {x=-90, y=64+5},
@@ -206,11 +229,11 @@ minetest.register_on_joinplayer(function(player)
         offset = {x=-64, y=64+7},
     })
     -- Population Count
-    player:hud_add({
+    hud_id_population = player:hud_add({
         name = "population",
         hud_elem_type = "text",
         position = {x=1, y=0},
-        text = math.floor(player:get_meta():get_float("energy")+0.5),
+        text = math.floor(player:get_meta():get_float("population")+0.5),
         number = 0xffffff,
         size = {x=3, y=3+5},
         offset = {x=-90, y=64+5+64},
@@ -226,11 +249,11 @@ minetest.register_on_joinplayer(function(player)
         offset = {x=-64, y=64+7+64},
     })
     -- Duration Count
-    player:hud_add({
+    hud_id_time = player:hud_add({
         name = "duration",
         hud_elem_type = "text",
         position = {x=1, y=0},
-        text = math.floor(player:get_meta():get_float("energy")+0.5),
+        text = math.floor(player:get_meta():get_float("time")+0.5),
         number = 0xffffff,
         size = {x=3, y=3+5},
         offset = {x=-90, y=64+5+64+64},
@@ -387,6 +410,7 @@ minetest.register_item("builda:road", {
         if pointed_thing.type == "node" then
             if PlayerCanAfford(user, 1) and logistics.place("city:street_off", pointed_thing.above, user) then
                 AddPlayerCoins(user, -1)
+                AddPlayerCO2(user, 5)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
@@ -442,17 +466,35 @@ minetest.register_item("builda:mall", {
     end
 })
 
-minetest.register_item("builda:residential", {
-    description = S("Residential"),
-    inventory_image = "builda_residential.png",
+minetest.register_item("builda:residential_concrete", {
+    description = S("Residential Concrete House"),
+    inventory_image = "builda_residential_concrete.png",
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
-        print("builda:residential.on_place() at " .. minetest.pos_to_string(pointed_thing.above))
-        print("on_place() pointed_thing: "..minetest.serialize(pointed_thing))
         if pointed_thing.type == "node" then
             if PlayerCanAfford(user, 1) then
-                if insta.build_residential(pointed_thing, user) then
+                if insta.build_residential_concrete(pointed_thing, user) then
                     AddPlayerCoins(user, -1)
+                    AddPlayerPopulation(user, 13)
+                    AddPlayerCO2(user, 70)
+                   minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
+                end
+            end
+        end
+    end
+})
+
+minetest.register_item("builda:residential_wood", {
+    description = S("Residential Wooden House"),
+    inventory_image = "builda_residential_wood.png",
+    type = "tool",
+    on_place = function(itemstack, user, pointed_thing)
+        if pointed_thing.type == "node" then
+            if PlayerCanAfford(user, 1) then
+                if insta.build_residential_wood(pointed_thing, user) then
+                    AddPlayerCoins(user, -1)
+                    AddPlayerPopulation(user, 6)
+                    AddPlayerCO2(user, 20)
                     minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
                 end
             end

@@ -229,7 +229,52 @@ city.register_building("city:mall_d", {height = 1, mesh = "city_mall_d", kind = 
 city.register_building("city:mall_e", {height = 1, mesh = "city_mall_e", kind = "mall"})
 city.register_building("city:mall_f", {height = 1, mesh = "city_mall_f", kind = "mall", width = 2})
 
-city.register_building("city:residential_1", {height = 0.6, mesh = "city_residential_1", kind = "residential", level = 1})
-city.register_building("city:residential_2", {height = 0.8, mesh = "city_residential_2", kind = "residential", level = 2})
-city.register_building("city:residential_3", {height = 1, mesh = "city_residential_3", kind = "residential", level = 3})
-city.register_building("city:residential_4", {height = 2, mesh = "city_residential_4", kind = "residential", level = 4})
+city.register_building("city:residential_concrete_1", {
+    height = 0.6,
+    mesh = "city_residential_1",
+    kind = "residential_concrete",
+    level = 1
+})
+city.register_building("city:residential_concrete_2", {
+    height = 0.8,
+    mesh = "insta_residential_concrete_2",
+    kind = "residential_concrete",
+    level = 2
+})
+city.register_building("city:residential_concrete_3", {
+    height = 1,
+    mesh = "city_residential_3",
+    kind = "residential_concrete",
+    level = 3
+})
+city.register_building("city:residential_concrete_4", {
+    height = 2,
+    mesh = "city_residential_4",
+    kind = "residential_concrete",
+    level = 4
+})
+
+city.register_building("city:residential_wood_1", {
+    height = 0.6,
+    mesh = "insta_residential_wood_1",
+    kind = "residential_wood",
+    level = 1
+})
+city.register_building("city:residential_wood_2", {
+    height = 0.8,
+    mesh = "insta_residential_wood_2",
+    kind = "residential_wood",
+    level = 2
+})
+-- city.register_building("city:residential_wood_3", {
+--     height = 1,
+--     mesh = "city_residential_wood_3",
+--     kind = "residential_wood",
+--     level = 3
+-- })
+-- city.register_building("city:residential_wood_4", {
+--     height = 2,
+--     mesh = "city_residential_wood_4",
+--     kind = "residential_wood",
+--     level = 4
+-- })
