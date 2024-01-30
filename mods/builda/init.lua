@@ -19,33 +19,39 @@ local AddPlayerEnergy = function(player, energy)
 end
 
 --returns true if the player can afford.
-local AddPlayerCoins = function(player, coins)
-    player:get_meta():set_int("coins", player:get_meta():get_int("coins") + coins);
-    if player:get_meta():get_int("coins") < 0 then
-        player:get_meta():set_int("coins", player:get_meta():get_int("coins")-coins)
+local AddPlayerCosts = function(player, coins)
+    player:get_meta():set_int("costs", player:get_meta():get_int("costs") + coins);
+    if player:get_meta():get_int("costs") < 0 then
+        player:get_meta():set_int("costs", 0)
         return false
     end
-    player:hud_change(hud_id_money, "text", player:get_meta():get_int("coins"))
+    if hud_id_money then
+        player:hud_change(hud_id_money, "text", player:get_meta():get_int("costs"))
+    end
     return true
 end
 
 local AddPlayerPopulation = function(player, coins)
     player:get_meta():set_int("population", player:get_meta():get_int("population") + coins);
     if player:get_meta():get_int("population") < 0 then
-        player:get_meta():set_int("population", player:get_meta():get_int("population")-coins)
+        player:get_meta():set_int("population", 0)
         return false
     end
-    player:hud_change(hud_id_population, "text", player:get_meta():get_int("population"))
+    if hud_id_population then
+        player:hud_change(hud_id_population, "text", player:get_meta():get_int("population"))
+    end
     return true
 end
 
 local AddPlayerCO2 = function(player, coins)
     player:get_meta():set_int("co2", player:get_meta():get_int("co2") + coins);
     if player:get_meta():get_int("co2") < 0 then
-        player:get_meta():set_int("co2", player:get_meta():get_int("co2")-coins)
+        player:get_meta():set_int("co2", 0)
         return false
     end
-    player:hud_change(hud_id_co2, "text", player:get_meta():get_int("co2"))
+    if hud_id_co2 then
+        player:hud_change(hud_id_co2, "text", player:get_meta():get_int("co2"))
+    end
     return true
 end
 
@@ -74,7 +80,7 @@ minetest.register_on_punchnode(function(pos, node, puncher, pointed_thing)
         if height == 0 then
             height = 1
         end
-        AddPlayerCoins(puncher, income)
+        AddPlayerCosts(puncher, income)
         minetest.sound_play("builda_income", {pos = pos, max_hear_distance = 20})
         minetest.add_particle({
             pos={x=pos.x, y=pos.y-(2.9-height), z=pos.z},
@@ -168,8 +174,8 @@ minetest.register_item(":", {
 minetest.register_on_joinplayer(function(player)    
 
     --Give the player their starting coins.
-    if player:get_meta():contains("coins") == false then
-        AddPlayerCoins(player, 100)
+    if player:get_meta():contains("costs") == false then
+        AddPlayerCosts(player, 0)
     end
 
     local list = {
@@ -202,7 +208,7 @@ minetest.register_on_joinplayer(function(player)
         name = "coins",
         hud_elem_type = "text",
         position = {x=1, y=0},
-        text = player:get_meta():get_int("coins"),
+        text = player:get_meta():get_int("costs"),
         number = 0xffffff,
         size = {x=3, y=3},
         offset = {x=-90, y=10},
@@ -367,19 +373,6 @@ minetest.register_item("builda:info", {
     end
 })
 
-minetest.register_item("builda:mine", {
-    description = S("Mine"),
-    inventory_image = "builda_mine.png",
-    type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
-        if pointed_thing.type == "node" then
-            if pointed_thing.type == "node" then
-                minetest.set_node(pointed_thing.above, {name="city:coal_mine"})
-            end
-        end
-    end
-})
-
 minetest.register_item("builda:road", {
     description = S("Road"),
     inventory_image = "builda_road.png",
@@ -388,59 +381,10 @@ minetest.register_item("builda:road", {
         _G.worksaver.update_area(pointed_thing.above)
         _G.worksaver.print_area()
         if pointed_thing.type == "node" then
-            if PlayerCanAfford(user, 1) and logistics.place("city:street_off", pointed_thing.above, user) then
-                AddPlayerCoins(user, -1)
+            if logistics.place("city:street_off", pointed_thing.above, user) then
+                AddPlayerCosts(user, 3)
                 AddPlayerCO2(user, 5)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-            end
-        end
-    end
-})
-
-minetest.register_item("builda:house", {
-    description = S("House"),
-    inventory_image = "builda_house.png",
-    type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
-        if pointed_thing.type == "node" then
-            if PlayerCanAfford(user, 1) then
-                if city.build("house", pointed_thing.above, user) then
-                    AddPlayerCoins(user, -1)
-                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-                end
-            end
-        end
-    end
-})
-
-minetest.register_item("builda:shop", {
-    description = S("Shop"),
-    inventory_image = "builda_shop.png",
-    type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
-        if pointed_thing.type == "node" then
-            if PlayerCanAfford(user, 2) then
-                if city.build("shop", pointed_thing.above, user) then
-                    AddPlayerCoins(user, -2)
-                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-                end
-            end
-        end
-    end
-})
-
-minetest.register_item("builda:mall", {
-    description = S("Mall"),
-    inventory_image = "builda_mall.png",
-    type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
-        print("builda:mall.on_place()")
-        if pointed_thing.type == "node" then
-            if PlayerCanAfford(user, 5) then
-                if city.build("mall", pointed_thing.above, user) then
-                    AddPlayerCoins(user, -5)
-                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-                end
             end
         end
     end
@@ -452,13 +396,11 @@ minetest.register_item("builda:residential_concrete", {
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if PlayerCanAfford(user, 1) then
-                if insta.build_residential_concrete(pointed_thing, user) then
-                    AddPlayerCoins(user, -1)
-                    AddPlayerPopulation(user, 13)
-                    AddPlayerCO2(user, 70)
-                   minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-                end
+            if insta.build_residential_concrete(pointed_thing, user) then
+                AddPlayerCosts(user, 10)
+                AddPlayerPopulation(user, 13)
+                AddPlayerCO2(user, 70)
+                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end,
@@ -466,7 +408,7 @@ minetest.register_item("builda:residential_concrete", {
         minetest.debug("on_use: node type: " .. pointed_thing.type)
         if pointed_thing.type == "node" then
             if insta.unbuild_residential_concrete(pointed_thing, user) then
-                AddPlayerCoins(user, 1)
+                AddPlayerCosts(user, -10)
                 AddPlayerPopulation(user, -13)
                 AddPlayerCO2(user, -70)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
@@ -482,13 +424,11 @@ minetest.register_item("builda:residential_wood", {
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if PlayerCanAfford(user, 1) then
-                if insta.build_residential_wood(pointed_thing, user) then
-                    AddPlayerCoins(user, -1)
-                    AddPlayerPopulation(user, 6)
-                    AddPlayerCO2(user, 20)
-                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-                end
+            if insta.build_residential_wood(pointed_thing, user) then
+                AddPlayerCosts(user, 10)
+                AddPlayerPopulation(user, 6)
+                AddPlayerCO2(user, 20)
+                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end,
@@ -496,7 +436,7 @@ minetest.register_item("builda:residential_wood", {
         if pointed_thing.type == "node" then
             if PlayerCanAfford(user, 1) then
                 if insta.unbuild_residential_wood(pointed_thing, user) then
-                    AddPlayerCoins(user, 1)
+                    AddPlayerCosts(user, -10)
                     AddPlayerPopulation(user, -6)
                     AddPlayerCO2(user, -20)
                     minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
@@ -505,23 +445,6 @@ minetest.register_item("builda:residential_wood", {
         end
     end
 })
-
-minetest.register_item("builda:skyscraper", {
-    description = S("Skyscraper"),
-    inventory_image = "builda_skyscraper.png",
-    type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
-        if pointed_thing.type == "node" then
-            if PlayerCanAfford(user, 10) then
-                if city.build("skyscraper", pointed_thing.above, user) then
-                    AddPlayerCoins(user, -10)
-                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-                end
-            end
-        end
-    end
-})
-
 
 --Destroyer is used to destroy built nodes such as roads and buildings.
 minetest.register_item("builda:destroyer", {
