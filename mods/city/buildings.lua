@@ -231,7 +231,7 @@ city.register_building("city:mall_f", {height = 1, mesh = "city_mall_f", kind = 
 
 city.register_building("city:residential_concrete_1", {
     height = 0.6,
-    mesh = "city_residential_1",
+    mesh = "insta_residential_concrete_1",
     kind = "residential_concrete",
     level = 1
 })
@@ -243,13 +243,13 @@ city.register_building("city:residential_concrete_2", {
 })
 city.register_building("city:residential_concrete_3", {
     height = 1,
-    mesh = "city_residential_3",
+    mesh = "insta_residential_concrete_3",
     kind = "residential_concrete",
     level = 3
 })
 city.register_building("city:residential_concrete_4", {
     height = 2,
-    mesh = "city_residential_4",
+    mesh = "insta_residential_concrete_4",
     kind = "residential_concrete",
     level = 4
 })

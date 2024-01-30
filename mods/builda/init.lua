@@ -248,26 +248,6 @@ minetest.register_on_joinplayer(function(player)
         size = {x=48, y=48+5},
         offset = {x=-64, y=64+7+64},
     })
-    -- Duration Count
-    hud_id_time = player:hud_add({
-        name = "duration",
-        hud_elem_type = "text",
-        position = {x=1, y=0},
-        text = math.floor(player:get_meta():get_float("time")+0.5),
-        number = 0xffffff,
-        size = {x=3, y=3+5},
-        offset = {x=-90, y=64+5+64+64},
-        alignment = {x=-1, y=1},
-    })
-    -- Duration Icon
-    player:hud_add({
-        hud_elem_type = "statbar",
-        position = {x=1, y=0},
-        text = "duration.png",
-        number = 2,
-        size = {x=48, y=48+5},
-        offset = {x=-64, y=64+7+64+64},
-    })
 
 
     --Setup camera, the player is inside an energy distrubution craft
