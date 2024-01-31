@@ -1,3 +1,9 @@
+local builda = {
+    changed = true,
+}
+
+_G.builda = builda
+
 print("Init mods/builda/init.lua")
 
 dofile(minetest.get_modpath("insta").."/countdown.lua")
@@ -17,6 +23,19 @@ local AddPlayerEnergy = function(player, energy)
     player:get_meta():set_float("energy", player:get_meta():get_float("energy")+energy)
     player:hud_change(hud_id_co2, "text", math.floor(0.5+player:get_meta():get_float("energy")))
 end
+
+local function reset_state() 
+    for _, player in ipairs(minetest.get_connected_players()) do
+        player:get_meta():set_int("costs", 0)
+        player:get_meta():set_int("population", 0)
+        player:get_meta():set_int("co2", 0)
+        player:hud_change(hud_id_money, "text", 0)
+        player:hud_change(hud_id_co2, "text", 0)
+        player:hud_change(hud_id_population, "text", 0)
+    end
+end
+
+_G.builda.Reset_state = reset_state
 
 --returns true if the player can afford.
 local AddPlayerCosts = function(player, coins)

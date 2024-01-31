@@ -2,9 +2,11 @@ print("This is the insta mod at mods/insta/init.lua")
 
 local S = minetest.get_translator("insta")
 
-insta = {
+local insta = {
     changed = true,
 }
+
+_G.insta = insta
 
 -- #################### INTRO FORM ####################
 
@@ -33,7 +35,7 @@ local function start_countdown()
         })
     end
 
-    _G.countdown.start(players[1], "Verbleibende Zeit: ", 420, on_end, 60, on_warn)
+    _G.countdown.start(players[1], "Verbleibende Zeit: ",420, on_end, 60, on_warn)
 end
 
 minetest.register_on_joinplayer(function(player)
@@ -43,6 +45,7 @@ end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if (formname == "insta:welcomeDE") and fields.start then
+        _G.builda.Reset_state()
         start_countdown()
         minetest.show_formspec(player:get_player_name(), formname, "")
     end
