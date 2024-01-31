@@ -52,12 +52,17 @@ function _G.worksaver.print_area()
         "  z: "..(z_max - z_min + 1).." ("..z_min..", "..z_max..")")
 end
 
-function _G.worksaver.save_area_to_file()
-    local pos1 = {x = x_min, y = y_min, z = z_min}
-    local pos2 = {x = x_max, y = y_max, z = z_max}
+function _G.worksaver.save_area_to_file(min_pos, max_pos)
+    local pos1 = min_pos or {x = x_min, y = y_min, z = z_min}
+    local pos2 = max_pos or {x = x_max, y = y_max, z = z_max}
     local modpath = minetest.get_modpath("worksaver")
     local date = os.date("%Y-%m-%d_%H-%M-%S")
-    local filename = date .. ".mts"
+    local filename = ""
+    if min_pos then
+        filename = min_pos.x .. "_" .. min_pos.z .. ".mts"
+    else
+        filename = date .. ".mts"
+    end
     local filepath = modpath .. "/schematics/" .. filename
     minetest.create_schematic(pos1, pos2, nil, filepath)
     minetest.debug("Area saved to file: " .. filename .. " from " ..
@@ -66,24 +71,66 @@ end
 
 minetest.register_chatcommand("savearea", {
     description = "Save the specified area to a file",
-    func = function(name, param)
-        _G.worksaver.save_area_to_file()
-        return true, "Area saved to file."
-    end,
+    func = function(name, radius)
+        if radius and radius ~= "" then
+            local player = minetest.get_player_by_name(name)
+            if player then
+                local pos = player:get_pos()
+                if pos then
+                    local min_pos = {x = math.floor(pos.x + 0.5 - radius), y = 9, z = math.floor(pos.z + 0.5 - radius)}
+                    local max_pos = {x = math.floor(pos.x + 0.5 + radius), y = 9, z = math.floor(pos.z + 0.5 + radius)}
+                    _G.worksaver.save_area_to_file(min_pos, max_pos)
+                else
+                    return false, "No player position obtained."
+                end
+            else
+                return false, "Player not found."
+            end
+        else
+            -- The player did not use a parameter.
+            _G.worksaver.save_area_to_file()
+            return true, "Worked area saved to file."
+        end
+    end
 })
 
-function _G.worksaver.load_area_from_file()
-    local schematic_path = minetest.get_modpath("worksaver") .. "/schematics/2024-01-15_11-48-10.mts"
+local function split_string(inputstr, sep)
+    if sep == nil then
+        sep = "%s"
+    end
+    local t={}
+    for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+        table.insert(t, str)
+    end
+    return t
+end
+
+local function reset_world()
+    _G.worksaver.load_area_from_file("-135_-56") -- manually saved world "Startwelt"
+end
+
+_G.worksaver.Reset_world = reset_world
+
+function _G.worksaver.load_area_from_file(filename)
+    local xz_coords = split_string(filename, "_")
+    local x_min = tonumber(xz_coords[1])
+    local z_min = tonumber(xz_coords[2])
+    local schematic_path = minetest.get_modpath("worksaver") .. "/schematics/"..filename..".mts"
     local schematic = minetest.read_schematic(schematic_path, "mts")
-    local pos = minetest.get_player_by_name("singleplayer"):get_pos()
+    local pos = {x = x_min, y = 9, z = z_min}
+    minetest.debug("placing schematic at " .. minetest.pos_to_string(pos))
     minetest.place_schematic(pos, schematic)
 end
 
 minetest.register_chatcommand("loadarea", {
     description = "Loads an area from a schematic file and places it at the given position",
-    func = function(name, param)
-        _G.worksaver.load_area_from_file()
-        return true, "Area loaded from file."
+    func = function(name, filename)
+        if filename then
+            _G.worksaver.load_area_from_file(filename)
+            return true, "Area loaded from file."
+        else
+            return false, "No filename given to load from"
+        end
     end,
 })
 

@@ -22,6 +22,7 @@ local function start_countdown()
     local players = minetest.get_connected_players()
 
     local function on_end(player)
+        _G.worksaver.Reset_world()
         showIntroForm_DE(player, "IntroGraphic.jpg")
     end
 
