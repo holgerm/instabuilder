@@ -24,7 +24,6 @@ local function start_countdown()
     local players = minetest.get_connected_players()
 
     local function on_end(player)
-        _G.worksaver.Reset_world()
         showIntroForm_DE(player, "IntroGraphic.jpg")
     end
 
@@ -35,6 +34,7 @@ local function start_countdown()
         })
     end
 
+    _G.countdown.set_color(0xFFFFFF) -- set text to white
     _G.countdown.start(players[1], "Verbleibende Zeit: ",420, on_end, 60, on_warn)
 end
 
@@ -45,7 +45,7 @@ end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
     if (formname == "insta:welcomeDE") and fields.start then
-        _G.builda.Reset_state()
+        _G.worksaver.Reset_world()
         start_countdown()
         minetest.show_formspec(player:get_player_name(), formname, "")
     end

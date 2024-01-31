@@ -106,7 +106,15 @@ local function split_string(inputstr, sep)
 end
 
 local function reset_world()
-    _G.worksaver.load_area_from_file("-135_-56") -- manually saved world "Startwelt"
+    local x_my = -135
+    local z_my = -56
+    local radius = 50
+    _G.worksaver.load_area_from_file(tostring(x_my).."_"..tostring(z_my)) -- manually saved world "Startwelt"
+    _G.builda.Reset_state()
+    local player = minetest.get_connected_players()[1]
+    player:set_pos({x = x_my + radius, y = 19, z = z_my + radius - 15})
+    player:set_look_horizontal(0)
+    player:set_look_vertical((math.pi)/6)
 end
 
 _G.worksaver.Reset_world = reset_world
