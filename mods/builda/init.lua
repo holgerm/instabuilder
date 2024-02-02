@@ -16,8 +16,11 @@ dofile(minetest.get_modpath("insta").."/countdown.lua")
 local S = minetest.get_translator("builda")
 
 local hud_id_money
+local hud_id_money_icon
 local hud_id_co2
+local hud_id_co2_icon
 local hud_id_population
+local hud_id_population_icon
 
 local AddPlayerEnergy = function(player, energy)
     player:get_meta():set_float("energy", player:get_meta():get_float("energy")+energy)
@@ -32,6 +35,8 @@ local function reset_state()
         player:hud_change(hud_id_money, "text", 0)
         player:hud_change(hud_id_co2, "text", 0)
         player:hud_change(hud_id_population, "text", 0)
+        -- Change the text color to red
+        player:hud_change(hud_id_population, "number", 0xFF0000)
     end
 end
 
@@ -46,7 +51,15 @@ local AddPlayerCosts = function(player, coins)
     end
     if hud_id_money then
         player:hud_change(hud_id_money, "text", player:get_meta():get_int("costs"))
+        if player:get_meta():get_int("costs") > _G.insta.goal_money then
+            -- Change the text color to red
+            player:hud_change(hud_id_money, "number", 0xFF0000)
+        else
+            -- Change the text color to white
+            player:hud_change(hud_id_money, "number", 0xFFFFFF)
+        end
     end
+
     return true
 end
 
@@ -54,10 +67,18 @@ local AddPlayerPopulation = function(player, coins)
     player:get_meta():set_int("population", player:get_meta():get_int("population") + coins);
     if player:get_meta():get_int("population") < 0 then
         player:get_meta():set_int("population", 0)
+        -- Change the text color to red
+        player:hud_change(hud_id_population, "number", 0xFF0000)
         return false
     end
     if hud_id_population then
         player:hud_change(hud_id_population, "text", player:get_meta():get_int("population"))
+        if player:get_meta():get_int("population") < _G.insta.goal_population then
+            -- Change the text color to red
+            player:hud_change(hud_id_population, "number", 0xFF0000)
+        else
+            player:hud_change(hud_id_population, "number", 0xFFFFFF)
+        end
     end
     return true
 end
@@ -70,6 +91,13 @@ local AddPlayerCO2 = function(player, coins)
     end
     if hud_id_co2 then
         player:hud_change(hud_id_co2, "text", player:get_meta():get_int("co2"))
+        if player:get_meta():get_int("co2") > _G.insta.goal_co2 then
+            -- Change the text color to red
+            player:hud_change(hud_id_co2, "number", 0xFF0000)
+        else
+            -- Change the text color to white
+            player:hud_change(hud_id_co2, "number", 0xFFFFFF)
+        end
     end
     return true
 end
@@ -149,25 +177,6 @@ local stored_wield_index = 1
 
 minetest.register_globalstep(function(dt)
     for _, player in ipairs(minetest.get_connected_players()) do
-
-        local look_dir = player:get_look_dir()
-        local player_pos = player:get_pos()
-        local ray = minetest.raycast({x = player_pos.x, y = player_pos.y + 1.5, z = player_pos.z}, vector.add(player_pos, vector.multiply(look_dir, 10)), false, true)
-        local pointed_thing = ray:next()
-        minetest.debug("pointed thing: " .. minetest.serialize(pointed_thing))
-        -- if pointed_thing and pointed_thing.type == "node" then
-        --     local node = minetest.get_node(pointed_thing.under)
-        --     if (node.name:sub(1,#"city:residential_concrete") == "city:residential_concrete") then
-        --         player:set_wield_index(3)
-        --     end
-        --     if (node.name:sub(1,#"city:residential_brick") == "city:residential_brick") then
-        --         player:set_wield_index(4)
-        --     end
-        --     if (node.name:sub(1,#"city:residential_wood") == "city:residential_wood") then
-        --         player:set_wield_index(5)
-        --     end
-        -- end
-
         if player:get_hp() > 0 then
             local controls = player:get_player_control() 
             if controls.aux1 then
@@ -235,7 +244,7 @@ minetest.register_on_joinplayer(function(player)
     player:hud_set_hotbar_image("builda_empty.png")
 
     --Brain Icon.
-    player:hud_add({
+    hud_id_money_icon = player:hud_add({
         hud_elem_type = "statbar",
         position = {x=1, y=0},
         text = "cost.png",
@@ -266,7 +275,7 @@ minetest.register_on_joinplayer(function(player)
         alignment = {x=-1, y=1},
     })
     --Energy Icon
-    player:hud_add({
+    hud_id_co2_icon = player:hud_add({
         hud_elem_type = "statbar",
         position = {x=1, y=0},
         text = "co2.png",
@@ -286,7 +295,7 @@ minetest.register_on_joinplayer(function(player)
         alignment = {x=-1, y=1},
     })
     -- Population Icon
-    player:hud_add({
+    hud_id_population_icon = player:hud_add({
         hud_elem_type = "statbar",
         position = {x=1, y=0},
         text = "population.png",
@@ -413,6 +422,19 @@ minetest.register_item("builda:info", {
     end
 })
 
+local road_cost = 3
+local road_co2 = 5
+local residential_concrete_cost = 8
+local residential_brick_cost = 6
+local residential_wood_cost = 4
+local residential_brick_population = 8
+local residential_wood_population = 4
+local residential_concrete_population = 12
+local residential_brick_co2 = 5
+local residential_wood_co2 = 2
+local residential_concrete_co2 = 13
+
+
 minetest.register_item("builda:road", {
     description = S("Road"),
     inventory_image = "builda_road.png",
@@ -422,8 +444,8 @@ minetest.register_item("builda:road", {
         _G.worksaver.print_area()
         if pointed_thing.type == "node" then
             if logistics.place("city:street_off", pointed_thing.above, user) then
-                AddPlayerCosts(user, 3)
-                AddPlayerCO2(user, 5)
+                AddPlayerCosts(user, road_cost)
+                AddPlayerCO2(user, road_co2)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
@@ -437,9 +459,9 @@ minetest.register_item("builda:residential_concrete", {
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
             if insta.build_residential_concrete(pointed_thing, user) then
-                AddPlayerCosts(user, 10)
-                AddPlayerPopulation(user, 13)
-                AddPlayerCO2(user, 70)
+                AddPlayerCosts(user, residential_concrete_cost)
+                AddPlayerPopulation(user, residential_concrete_population)
+                AddPlayerCO2(user, residential_concrete_co2)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
@@ -448,9 +470,9 @@ minetest.register_item("builda:residential_concrete", {
         minetest.debug("on_use: node type: " .. pointed_thing.type)
         if pointed_thing.type == "node" then
             if insta.unbuild_residential_concrete(pointed_thing, user) then
-                AddPlayerCosts(user, -10)
-                AddPlayerPopulation(user, -13)
-                AddPlayerCO2(user, -70)
+                AddPlayerCosts(user, -residential_concrete_cost)
+                AddPlayerPopulation(user, -residential_concrete_population)
+                AddPlayerCO2(user, -residential_concrete_co2)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
@@ -465,9 +487,9 @@ minetest.register_item("builda:residential_brick", {
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
             if insta.build_residential_brick(pointed_thing, user) then
-                AddPlayerCosts(user, 10)
-                AddPlayerPopulation(user, 6)
-                AddPlayerCO2(user, 20)
+                AddPlayerCosts(user, residential_brick_cost)
+                AddPlayerPopulation(user, residential_brick_population)
+                AddPlayerCO2(user, residential_brick_co2)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
@@ -475,9 +497,9 @@ minetest.register_item("builda:residential_brick", {
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
             if insta.unbuild_residential_brick(pointed_thing, user) then
-                AddPlayerCosts(user, -10)
-                AddPlayerPopulation(user, -6)
-                AddPlayerCO2(user, -20)
+                AddPlayerCosts(user, -residential_brick_cost)
+                AddPlayerPopulation(user, -residential_brick_population)
+                AddPlayerCO2(user, -residential_brick_co2)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
@@ -491,9 +513,9 @@ minetest.register_item("builda:residential_wood", {
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
             if insta.build_residential_wood(pointed_thing, user) then
-                AddPlayerCosts(user, 10)
-                AddPlayerPopulation(user, 6)
-                AddPlayerCO2(user, 20)
+                AddPlayerCosts(user, residential_wood_cost)
+                AddPlayerPopulation(user, residential_wood_population)
+                AddPlayerCO2(user, residential_wood_co2)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
@@ -501,9 +523,9 @@ minetest.register_item("builda:residential_wood", {
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
             if insta.unbuild_residential_wood(pointed_thing, user) then
-                AddPlayerCosts(user, -10)
-                AddPlayerPopulation(user, -6)
-                AddPlayerCO2(user, -20)
+                AddPlayerCosts(user, -residential_wood_cost)
+                AddPlayerPopulation(user, - residential_wood_population)
+                AddPlayerCO2(user, -residential_wood_co2)
                 minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end

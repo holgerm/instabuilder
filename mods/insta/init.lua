@@ -11,8 +11,11 @@ _G.insta = insta
 -- #################### INTRO FORM ####################
 
 local goal_money = 300 -- less than is better
+_G.insta.goal_money = goal_money
 local goal_co2 = 10000 -- less than is better
+_G.insta.goal_co2 = goal_co2
 local goal_population = 1000 -- more than is better
+_G.insta.goal_population = goal_population
 
 
 local function showIntroForm_Info(player)
