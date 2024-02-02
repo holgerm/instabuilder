@@ -254,6 +254,31 @@ city.register_building("city:residential_concrete_4", {
     level = 4
 })
 
+city.register_building("city:residential_brick_1", {
+    height = 0.6,
+    mesh = "insta_residential_brick_1",
+    kind = "residential_brick",
+    level = 1
+})
+city.register_building("city:residential_brick_2", {
+    height = 0.8,
+    mesh = "insta_residential_brick_2",
+    kind = "residential_brick",
+    level = 2
+})
+city.register_building("city:residential_brick_3", {
+    height = 1,
+    mesh = "insta_residential_brick_3",
+    kind = "residential_brick",
+    level = 3
+})
+city.register_building("city:residential_brick_4", {
+    height = 2,
+    mesh = "insta_residential_brick_4",
+    kind = "residential_brick",
+    level = 4
+})
+
 city.register_building("city:residential_wood_1", {
     height = 0.6,
     mesh = "insta_residential_wood_1",

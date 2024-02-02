@@ -145,8 +145,29 @@ minetest.hud_replace_builtin("health", nil)
 
 local last_inventory_update = 0
 
+local stored_wield_index = 1
+
 minetest.register_globalstep(function(dt)
     for _, player in ipairs(minetest.get_connected_players()) do
+
+        local look_dir = player:get_look_dir()
+        local player_pos = player:get_pos()
+        local ray = minetest.raycast({x = player_pos.x, y = player_pos.y + 1.5, z = player_pos.z}, vector.add(player_pos, vector.multiply(look_dir, 10)), false, true)
+        local pointed_thing = ray:next()
+        minetest.debug("pointed thing: " .. minetest.serialize(pointed_thing))
+        -- if pointed_thing and pointed_thing.type == "node" then
+        --     local node = minetest.get_node(pointed_thing.under)
+        --     if (node.name:sub(1,#"city:residential_concrete") == "city:residential_concrete") then
+        --         player:set_wield_index(3)
+        --     end
+        --     if (node.name:sub(1,#"city:residential_brick") == "city:residential_brick") then
+        --         player:set_wield_index(4)
+        --     end
+        --     if (node.name:sub(1,#"city:residential_wood") == "city:residential_wood") then
+        --         player:set_wield_index(5)
+        --     end
+        -- end
+
         if player:get_hp() > 0 then
             local controls = player:get_player_control() 
             if controls.aux1 then
@@ -176,7 +197,6 @@ minetest.register_globalstep(function(dt)
 
             --FIXME how to show city info?
 
-            
         end
     end
 end)
@@ -201,6 +221,7 @@ minetest.register_on_joinplayer(function(player)
         "builda:info 1",
         "builda:road 1",
         "builda:residential_concrete 1",
+        "builda:residential_brick 1",
         "builda:residential_wood 1",
         "builda:destroyer 1",
     }
@@ -411,7 +432,7 @@ minetest.register_item("builda:road", {
 
 minetest.register_item("builda:residential_concrete", {
     description = S("Residential Concrete House"),
-    inventory_image = "builda_residential_concrete.png",
+    inventory_image = "house_concrete.png",
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
@@ -437,9 +458,35 @@ minetest.register_item("builda:residential_concrete", {
 
 })
 
+minetest.register_item("builda:residential_brick", {
+    description = S("Residential Brick House"),
+    inventory_image = "house_brick.png",
+    type = "tool",
+    on_place = function(itemstack, user, pointed_thing)
+        if pointed_thing.type == "node" then
+            if insta.build_residential_brick(pointed_thing, user) then
+                AddPlayerCosts(user, 10)
+                AddPlayerPopulation(user, 6)
+                AddPlayerCO2(user, 20)
+                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
+            end
+        end
+    end,
+    on_use = function(itemstack, user, pointed_thing)
+        if pointed_thing.type == "node" then
+            if insta.unbuild_residential_brick(pointed_thing, user) then
+                AddPlayerCosts(user, -10)
+                AddPlayerPopulation(user, -6)
+                AddPlayerCO2(user, -20)
+                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
+            end
+        end
+    end
+})
+
 minetest.register_item("builda:residential_wood", {
     description = S("Residential Wooden House"),
-    inventory_image = "builda_residential_wood.png",
+    inventory_image = "house_wood.png",
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
@@ -453,58 +500,56 @@ minetest.register_item("builda:residential_wood", {
     end,
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if PlayerCanAfford(user, 1) then
-                if insta.unbuild_residential_wood(pointed_thing, user) then
-                    AddPlayerCosts(user, -10)
-                    AddPlayerPopulation(user, -6)
-                    AddPlayerCO2(user, -20)
-                    minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
-                end
+            if insta.unbuild_residential_wood(pointed_thing, user) then
+                AddPlayerCosts(user, -10)
+                AddPlayerPopulation(user, -6)
+                AddPlayerCO2(user, -20)
+                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end
 })
 
 --Destroyer is used to destroy built nodes such as roads and buildings.
-minetest.register_item("builda:destroyer", {
-    description = S("Destroyer"),
-    inventory_image = "builda_destroyer.png",
-    type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
-        if pointed_thing.type == "node" then
-            local pos = pointed_thing.under
+-- minetest.register_item("builda:destroyer", {
+--     description = S("Destroyer"),
+--     inventory_image = "builda_destroyer.png",
+--     type = "tool",
+--     on_place = function(itemstack, user, pointed_thing)
+--         if pointed_thing.type == "node" then
+--             local pos = pointed_thing.under
 
-            if minetest.is_protected(pos, user:get_player_name()) then
-                minetest.record_protection_violation(pos, user:get_player_name())
-                minetest.sound_play("builda_error", {pos = pointed_thing.below, max_hear_distance = 20})
-                return
-            end
+--             if minetest.is_protected(pos, user:get_player_name()) then
+--                 minetest.record_protection_violation(pos, user:get_player_name())
+--                 minetest.sound_play("builda_error", {pos = pointed_thing.below, max_hear_distance = 20})
+--                 return
+--             end
 
-            local node = minetest.get_node(pos)
-            if PlayerHasEnergy(user, 5) and minetest.get_item_group(node.name, "consumer") > 0 and logistics.remove(pos) then
-                AddPlayerEnergy(user, -5)
+--             local node = minetest.get_node(pos)
+--             if PlayerHasEnergy(user, 5) and minetest.get_item_group(node.name, "consumer") > 0 and logistics.remove(pos) then
+--                 AddPlayerEnergy(user, -5)
 
-                --'explode' the node.
-                minetest.add_particlespawner({
-                    amount = 10,
-                    time = 0.2,
-                    minpos={x=pos.x-0.5, y=pos.y-0.5, z=pos.z-0.5},
-                    maxpos={x=pos.x+0.5, y=pos.y-0.5, z=pos.z+0.5},
-                    minvel={x=-4, y=2, z=-4},
-                    maxvel={x=4, y=4, z=4},
-                    texture = "builda_craft_default.png",
-                    minsize = 1,
-                    maxsize = 1,
-                    minexptime = 0.2,
-                    maxexptime = 0.2,
-                })
-                minetest.sound_play("builda_explode", {pos = pos, max_hear_distance = 20})
-            else
-                minetest.sound_play("builda_error", {pos = pointed_thing.below, max_hear_distance = 20})
-            end
-        end
-    end
-})
+--                 --'explode' the node.
+--                 minetest.add_particlespawner({
+--                     amount = 10,
+--                     time = 0.2,
+--                     minpos={x=pos.x-0.5, y=pos.y-0.5, z=pos.z-0.5},
+--                     maxpos={x=pos.x+0.5, y=pos.y-0.5, z=pos.z+0.5},
+--                     minvel={x=-4, y=2, z=-4},
+--                     maxvel={x=4, y=4, z=4},
+--                     texture = "builda_craft_default.png",
+--                     minsize = 1,
+--                     maxsize = 1,
+--                     minexptime = 0.2,
+--                     maxexptime = 0.2,
+--                 })
+--                 minetest.sound_play("builda_explode", {pos = pos, max_hear_distance = 20})
+--             else
+--                 minetest.sound_play("builda_error", {pos = pointed_thing.below, max_hear_distance = 20})
+--             end
+--         end
+--     end
+-- })
 
 
 local modpath = minetest.get_modpath("builda")

@@ -1,7 +1,7 @@
 # Blender 4.0.1
 # www.blender.org
-mtllib insta_residential_wood_1.mtl
-g insta_residential_wood_1_insta_residential_wood_1
+mtllib insta_residential_brick_1.mtl
+g insta_residential_brick_1_insta_residential_brick_1
 v -0.248960 -0.305600 0.440640
 v -0.248960 -0.406400 0.440640
 v -0.248960 -0.305600 0.426240
@@ -574,7 +574,7 @@ vt -0.423360 -0.305600
 vt -0.408960 -0.406400
 vt -0.423360 -0.406400
 s 0
-g insta_residential_wood_1__defaultMat(Clone)
+g insta_residential_brick_1__defaultMat(Clone)
 usemtl _defaultMat(Clone)
 f 25/1/1 91/2/1 90/3/1
 f 91/2/1 27/4/1 92/5/1
@@ -645,7 +645,7 @@ f 103/66/3 192/46/3 124/67/3
 f 102/74/3 192/46/3 103/66/3
 f 94/75/3 192/46/3 102/74/3
 f 192/46/3 94/75/3 76/49/3
-g insta_residential_wood_1_window(Clone)
+g insta_residential_brick_1_window(Clone)
 usemtl window(Clone)
 f 14/76/1 16/77/1 13/78/1
 f 16/77/1 14/76/1 15/79/1
@@ -660,7 +660,7 @@ f 116/95/4 119/96/4 115/97/4
 f 119/96/4 116/95/4 118/98/4
 f 133/99/3 135/100/3 132/101/3
 f 135/100/3 133/99/3 134/102/3
-g insta_residential_wood_1_door(Clone)
+g insta_residential_brick_1_door(Clone)
 usemtl door(Clone)
 f 34/103/1 63/104/1 64/105/1
 f 63/104/1 34/103/1 35/106/1
@@ -680,7 +680,7 @@ f 141/92/3 100/112/3 140/93/3
 f 143/94/3 100/112/3 141/92/3
 f 143/94/3 36/114/3 100/112/3
 f 36/114/3 143/94/3 31/113/3
-g insta_residential_wood_1_roof(Clone)
+g insta_residential_brick_1_roof(Clone)
 usemtl roof(Clone)
 f 146/115/6 145/116/6 144/117/6
 f 145/116/6 146/115/6 147/118/6
@@ -759,7 +759,7 @@ f 190/188/20 192/199/20 184/198/20
 f 192/199/20 190/188/20 188/190/20
 f 155/127/21 191/193/21 154/125/21
 f 191/193/21 155/127/21 186/200/21
-g insta_residential_wood_1_border(Clone)
+g insta_residential_brick_1_border(Clone)
 usemtl border(Clone)
 f 3/201/2 2/202/2 1/203/2
 f 2/202/2 3/201/2 4/204/2

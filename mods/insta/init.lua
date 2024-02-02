@@ -10,21 +10,41 @@ _G.insta = insta
 
 -- #################### INTRO FORM ####################
 
-local function showIntroForm_DE(player, image)
+local goal_money = 300 -- less than is better
+local goal_co2 = 10000 -- less than is better
+local goal_population = 1000 -- more than is better
+
+
+local function showIntroForm_Info(player)
+    local formspec = {
+        "formspec_version[4]",
+        "size[20,13]",
+        "box[0.5,0.5;19,12;#D8DBDCFF]",
+        "image[12,1;7.0,1.2;hdbg.png]",
+        "image[1,2.75;4.68,7.5;girl.png]",
+        "image[14.05,2.75;4.95,7.5;boy.png]",
+        "image[5.6,3.5;8.8,2.68;tasktext.png]",
+        "image_button[6,7.74;8,4.36;start.png;start;]",
+    }
+
+    minetest.show_formspec(player:get_player_name(), "insta:start", table.concat(formspec, ""))
+end
+
+local function showIntroForm_Start(player, image)
     local formspec = {
         "formspec_version[4]",
         "size[20,13]",
         "image_button[0.5,0.5;19,12;"..image..";start;]",
     }
 
-    minetest.show_formspec(player:get_player_name(), "insta:welcomeDE", table.concat(formspec, ""))
+    minetest.show_formspec(player:get_player_name(), "insta:start", table.concat(formspec, ""))
 end
 
 local function start_countdown()
     local players = minetest.get_connected_players()
 
     local function on_end(player)
-        showIntroForm_DE(player, "IntroGraphic.jpg")
+        showIntroForm_Info(player, "IntroGraphic.jpg")
     end
 
     local function on_warn(player)
@@ -40,11 +60,11 @@ end
 
 minetest.register_on_joinplayer(function(player)
     print("insta:register_on_joinplayer()")
-    showIntroForm_DE(player, "IntroGraphic.jpg")
+    showIntroForm_Info(player, "IntroGraphic.jpg")
 end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-    if (formname == "insta:welcomeDE") and fields.start then
+    if (formname == "insta:start") and fields.start then
         _G.worksaver.Reset_world()
         start_countdown()
         minetest.show_formspec(player:get_player_name(), formname, "")
@@ -123,6 +143,59 @@ function insta.unbuild_residential_concrete(pointed_thing, builder)
         end
     end
 end
+
+function insta.build_residential_brick(pointed_thing, builder)
+    local pos = pointed_thing.above
+    -- in case we have abuilding we pointed too high and adjust it here
+    if pos.y == 10 then
+        pos = pointed_thing.under
+    end
+    local current = minetest.get_node(pos)
+
+    -- level 1 on plain ground only if street is nearby:
+    if current.name == "air" then
+        local road = logistics.node_near(pos, builder, "street")
+        if not road then
+            print("no house and no road")
+            return false
+        else
+            return logistics.place(city.buildings["residential_brick"][1].."_off", pos, builder)
+        end
+    end
+    -- level is 2 or higher on plain ground only if street is nearby:
+    local building_type = "residential_brick"
+    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_brick_n")]
+    if current.name:sub(1,#"city:residential_brick") == "city:residential_brick" and item_def.level and item_def.level < 4 then
+        return logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, builder)
+    end
+end
+
+
+function insta.unbuild_residential_brick(pointed_thing, builder)
+    local pos = pointed_thing.above
+    -- in case we have abuilding we pointed too high and adjust it here
+    if pos.y > 9 then
+        pos = pointed_thing.under
+    end
+    local current = minetest.get_node(pos)
+
+    -- level 1 on plain ground only if street is nearby:
+    if current.name == "air" then
+        return false
+    end
+
+    -- level is 2 or higher on plain ground only if street is nearby:
+    local building_type = "residential_brick"
+    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_brick_n")]
+    if current.name:sub(1,#"city:residential_brick") == "city:residential_brick" and item_def.level then
+        if item_def.level > 1 then
+            return logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, builder)
+        elseif item_def.level == 1 then
+            return logistics.remove(pos, builder)
+        end
+    end
+end
+
 
 function insta.build_residential_wood(pointed_thing, builder)
     local pos = pointed_thing.above
