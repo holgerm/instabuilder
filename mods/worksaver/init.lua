@@ -64,8 +64,8 @@ function _G.worksaver.save_area_to_file(min_pos, max_pos)
     end
     local filepath = modpath .. "/schematics/" .. filename
     minetest.create_schematic(pos1, pos2, nil, filepath)
-    minetest.debug("Area saved to file: " .. filename .. " from " ..
-        minetest.pos_to_string(pos1) .. " to " .. minetest.pos_to_string(pos2))
+    -- minetest.debug("Area saved to file: " .. filename .. " from " ..
+    --     minetest.pos_to_string(pos1) .. " to " .. minetest.pos_to_string(pos2))
 end
 
 minetest.register_chatcommand("savearea", {

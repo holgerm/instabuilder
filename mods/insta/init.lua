@@ -8,7 +8,7 @@ _G.insta = insta
 
 -- #################### INTRO FORM ####################
 
-local build_time = 80 -- 7 minutes
+local build_time = 120 -- 7 minutes
 
 local goal_money = 300 -- less than is better
 _G.insta.goal_money = goal_money
