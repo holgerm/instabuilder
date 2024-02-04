@@ -1,5 +1,3 @@
-print("Init mods/industry/init.lua")
-
 --[[
     Industry mod provides industrial resouces and
     related buildings that generate resources for

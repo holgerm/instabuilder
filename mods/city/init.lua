@@ -1,5 +1,3 @@
-print("Init mods/city/init.lua")
-
 local S = minetest.get_translator("city")
 
 city = {

@@ -12,7 +12,6 @@ local z_min
 local z_max
 
 function _G.worksaver.update_area(pos)
-    minetest.debug("update_area: " .. minetest.pos_to_string(pos))
     if x_min == nil then
         x_min = pos.x
         x_max = pos.x
@@ -127,7 +126,6 @@ function _G.worksaver.load_area_from_file(filename)
     local schematic_path = minetest.get_modpath("worksaver") .. "/schematics/"..filename..".mts"
     local schematic = minetest.read_schematic(schematic_path, "mts")
     local pos = {x = x_min, y = 9, z = z_min}
-    minetest.debug("placing schematic at " .. minetest.pos_to_string(pos))
     minetest.place_schematic(pos, schematic)
 end
 
@@ -148,11 +146,6 @@ minetest.register_chatcommand("loadarea", {
 --- ####### TEST HTTP #######
 
 local http = minetest.request_http_api()
-if not http then
-    minetest.debug("HTTP not supported")
-else
-    minetest.debug("HTTP supported")
-end
 
 local function testhttp()
     if not http then
