@@ -25,11 +25,11 @@ local hudform = {
     "formspec_version[4]",
     "size[0,0]",
     "image[0,0;20,13;transparent.png]",
-    "image_button[6,7.74;8,4.36;start.png;start;]",
     "modal[]",
 }
 
 local function showIntroHUD(player)
+    print("showIntroHUD")
     if player then
         -- Add the image
         hud_id_intro_image = player:hud_add({
@@ -64,10 +64,12 @@ local function showIntroHUD(player)
         })
 
         minetest.show_formspec(player:get_player_name(), "insta:start", table.concat(hudform, ""))
+        print("showIntroHUD done for " .. player:get_player_name())
     end
 end
 
 local function hideIntroHUD(player)
+    print("hideIntroHUD")
     if player then
         if hud_id_intro_text_title then
             player:hud_remove(hud_id_intro_text_title)
@@ -81,33 +83,8 @@ local function hideIntroHUD(player)
     end
 end
 
-
-local function showIntroForm_Info(player)
-    local formspec = {
-        "formspec_version[4]",
-        "size[20,13]",
-        "box[0.5,0.5;19,12;#D8DBDCFF]",
-        "image[12,1;7.0,1.2;hdbg.png]",
-        "image[1,2.75;4.68,7.5;girl.png]",
-        "image[14.05,2.75;4.95,7.5;boy.png]",
-        "image[5.6,3.5;8.8,2.68;tasktext.png]",
-        "image_button[6,7.74;8,4.36;start.png;start;]",
-    }
-
-    minetest.show_formspec(player:get_player_name(), "insta:start", table.concat(formspec, ""))
-end
-
-local function showIntroForm_Start(player, image)
-    local formspec = {
-        "formspec_version[4]",
-        "size[20,13]",
-        "image_button[0.5,0.5;19,12;"..image..";start;]",
-    }
-
-    minetest.show_formspec(player:get_player_name(), "insta:start", table.concat(formspec, ""))
-end
-
 local function showResultHUD(player)
+    print("showResultHUD")
     if player then
         -- Add the image
         hud_id_intro_image = player:hud_add({
@@ -150,6 +127,7 @@ local function showResultHUD(player)
 end
 
 local function hideResultHUD(player)
+    print("hideResultHUD")
     if player then
         if hud_id_intro_text_title then
             player:hud_remove(hud_id_intro_text_title)
@@ -180,11 +158,11 @@ local function start_countdown()
 end
 
 minetest.register_on_joinplayer(function(player)
-    -- showIntroForm_Info(player, "IntroGraphic.jpg")
     showIntroHUD(player)
 end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
+    print("on_player_receive_fields: " .. formname)
     if (formname == "insta:start") then
         _G.worksaver.Reset_world()
         start_countdown()
@@ -193,7 +171,9 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
     if (formname == "insta:result") then
         hideResultHUD(player)
-        showIntroHUD(player)
+        minetest.after(0.1, function()
+            showIntroHUD(player)
+        end)
     end
 
 end)

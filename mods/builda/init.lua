@@ -4,8 +4,6 @@ local builda = {
 
 _G.builda = builda
 
-print("Init mods/builda/init.lua")
-
 dofile(minetest.get_modpath("insta").."/countdown.lua")
 
 --builda implements the gameplay logic of Builda City.
@@ -22,12 +20,7 @@ local hud_id_co2_icon
 local hud_id_population
 local hud_id_population_icon
 
-local AddPlayerEnergy = function(player, energy)
-    player:get_meta():set_float("energy", player:get_meta():get_float("energy")+energy)
-    player:hud_change(hud_id_co2, "text", math.floor(0.5+player:get_meta():get_float("energy")))
-end
-
-local function reset_state() 
+local function reset_state()
     for _, player in ipairs(minetest.get_connected_players()) do
         player:get_meta():set_int("costs", 0)
         player:get_meta():set_int("population", 0)
@@ -113,112 +106,7 @@ local AddPlayerCO2 = function(player, coins)
 end
 
 
-local PlayerCanAfford = function(player, coins)
-    return player:get_meta():get_int("coins") >= coins
-end
-
-local PlayerHasEnergy = function(player, energy)
-    return player:get_meta():get_float("energy") >= energy
-end
-
-minetest.register_on_punchnode(function(pos, node, puncher, pointed_thing)
-    if PlayerHasEnergy(puncher, 1) and city.power(pos) then
-        local income = 1
-        if string.match(node.name,"shop") then
-            income = 2
-        end
-        if string.match(node.name,"mall") then
-            income = 5
-        end
-        if string.match(node.name,"skyscraper") then
-            income = 10
-        end
-        local height = minetest.get_item_group(node.name, "height")
-        if height == 0 then
-            height = 1
-        end
-        AddPlayerCosts(puncher, income)
-        minetest.sound_play("builda_income", {pos = pos, max_hear_distance = 20})
-        minetest.add_particle({
-            pos={x=pos.x, y=pos.y-(2.9-height), z=pos.z},
-            velocity={x=0, y=16, z=0},
-            acceleration={x=0,y=-42,z=0},
-            texture = "builda_coin.png",
-            size = 8,
-            playername = puncher:get_player_name(),
-        })
-        AddPlayerEnergy(puncher, -1)
-    end
-    local energy = minetest.get_item_group(node.name, "energy_source")
-    if energy > 0 then
-        if node.name == "city:wind_turbine" then 
-            energy = energy * (pos.y-8) --energy is proportional to height (wind)
-        end
-        if city.disable(pos) then
-            minetest.after(1, function(energy)
-                AddPlayerEnergy(puncher, energy) 
-            end, energy)
-            minetest.sound_play("builda_charge", {pos = pos, max_hear_distance = 20})
-        end
-    end
-    if string.match(node.name, "city:.*_disabled") then
-        minetest.sound_play("builda_broken", {pos = pos, max_hear_distance = 20})
-        minetest.add_particlespawner({
-            amount = 20,
-            time = 0.3,
-            minpos={x=pos.x-0.5, y=pos.y-0.5, z=pos.z-0.5},
-            maxpos={x=pos.x+0.5, y=pos.y-0.5, z=pos.z+0.5},
-            minvel={x=-4, y=2, z=-4},
-            maxvel={x=4, y=4, z=4},
-            texture = "builda_energy.png",
-            minsize = 1,
-            maxsize = 1,
-            minexptime = 0.2,
-            maxexptime = 0.2,
-        })
-    end
-end)
-
 minetest.hud_replace_builtin("health", nil)
-
-local last_inventory_update = 0
-
-local stored_wield_index = 1
-
-minetest.register_globalstep(function(dt)
-    for _, player in ipairs(minetest.get_connected_players()) do
-        if player:get_hp() > 0 then
-            local controls = player:get_player_control() 
-            if controls.aux1 then
-                player:set_physics_override({
-                    speed = 8,
-                })
-            else 
-                player:set_physics_override({
-                    speed = 1,
-                })
-            end
-        end
-
-        last_inventory_update = last_inventory_update + dt
-        if last_inventory_update > 1 then
-            last_inventory_update = 0
-
-            local pos = player:get_pos()
-            if pos.y > 10 then
-                pos.y = 10
-            end
-
-            if true then
-                city.guide(player)
-                return
-            end
-
-            --FIXME how to show city info?
-
-        end
-    end
-end)
 
 minetest.item_drop = function() end
 
@@ -363,18 +251,6 @@ minetest.register_decoration({
 
 
 --Roads are starting points, where a player can start building from.
---[[minetest.register_decoration({
-    name = "builda:tree",
-    deco_type = "simple",
-    place_on = {"polymap:grass"},
-    fill_ratio = 0.05,
-    biomes = {"grassland"},
-    y_max = 31000,
-    y_min = 0,
-    decoration = "city:tree_a",
-})]]
-
---Roads are starting points, where a player can start building from.
 minetest.register_decoration({
     name = "builda:road",
     deco_type = "simple",
@@ -388,60 +264,21 @@ minetest.register_decoration({
 
 
 
-minetest.register_item("builda:info", {
-    description = S("Info"),
-    inventory_image = "builda_info.png",
-    type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
-        if not pointed_thing.under then
-            minetest.show_formspec(user:get_player_name(), "builda:guide", city.guide(user))
-            return
-        end
-
-        local pos = pointed_thing.under
-        local node = minetest.get_node_or_nil(pos)
-        if string.match(node.name,"city") then
-            local index = logistics.index(pos)
-            local resources = logistics.at(pos)
-
-            if index == 0 then
-                minetest.show_formspec(user:get_player_name(), "builda:guide", city.guide(user))
-                return
-            end
-
-            local founder = city.get_string(index, "founder")
-            if founder == user:get_player_name() then
-                founder = "you"
-            end
-
-            local population = resources.population or 0
-
-            local stats = city.get_string(index, "name").."\n("..founder.." founded this city)"..
-                "\n\nPopulation: "..population
-
-            minetest.show_formspec(user:get_player_name(), "builda:city_stats",
-                "size[8,7.2,false]"..
-                "hypertext[0.5,0;4.75,8.5;stats;"..stats.."]"..
-                "button_exit[1.3,6.2;1.5,0.8;close;OK]"
-            )
-        else
-            minetest.show_formspec(user:get_player_name(), "builda:guide", city.guide(user))
-        end
-    end
-})
 
 local road_cost = 3
 local road_co2 = 5
-local residential_concrete_cost = 8
-local residential_brick_cost = 6
-local residential_wood_cost = 4
-local residential_brick_population = 8
-local residential_wood_population = 4
-local residential_concrete_population = 12
-local residential_brick_co2 = 5
-local residential_wood_co2 = 2
-local residential_concrete_co2 = 13
 
+local residential_concrete_cost = 8
+local residential_concrete_co2 = 13
+local residential_concrete_population = 12
+
+local residential_brick_cost = 6
+local residential_brick_co2 = 5
+local residential_brick_population = 8
+
+local residential_wood_cost = 4
+local residential_wood_co2 = 2
+local residential_wood_population = 4
 
 minetest.register_item("builda:road", {
     description = S("Road"),
@@ -454,7 +291,6 @@ minetest.register_item("builda:road", {
             if logistics.place("city:street_off", pointed_thing.above, user) then
                 AddPlayerCosts(user, road_cost)
                 AddPlayerCO2(user, road_co2)
-                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end
@@ -470,18 +306,15 @@ minetest.register_item("builda:residential_concrete", {
                 AddPlayerCosts(user, residential_concrete_cost)
                 AddPlayerPopulation(user, residential_concrete_population)
                 AddPlayerCO2(user, residential_concrete_co2)
-                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end,
     on_use = function(itemstack, user, pointed_thing)
-        minetest.debug("on_use: node type: " .. pointed_thing.type)
         if pointed_thing.type == "node" then
             if insta.unbuild_residential_concrete(pointed_thing, user) then
                 AddPlayerCosts(user, -residential_concrete_cost)
                 AddPlayerPopulation(user, -residential_concrete_population)
                 AddPlayerCO2(user, -residential_concrete_co2)
-                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end
@@ -498,7 +331,6 @@ minetest.register_item("builda:residential_brick", {
                 AddPlayerCosts(user, residential_brick_cost)
                 AddPlayerPopulation(user, residential_brick_population)
                 AddPlayerCO2(user, residential_brick_co2)
-                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end,
@@ -508,7 +340,6 @@ minetest.register_item("builda:residential_brick", {
                 AddPlayerCosts(user, -residential_brick_cost)
                 AddPlayerPopulation(user, -residential_brick_population)
                 AddPlayerCO2(user, -residential_brick_co2)
-                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end
@@ -524,7 +355,6 @@ minetest.register_item("builda:residential_wood", {
                 AddPlayerCosts(user, residential_wood_cost)
                 AddPlayerPopulation(user, residential_wood_population)
                 AddPlayerCO2(user, residential_wood_co2)
-                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end,
@@ -534,53 +364,10 @@ minetest.register_item("builda:residential_wood", {
                 AddPlayerCosts(user, -residential_wood_cost)
                 AddPlayerPopulation(user, - residential_wood_population)
                 AddPlayerCO2(user, -residential_wood_co2)
-                minetest.sound_play("builda_pay", {pos = pointed_thing.above, max_hear_distance = 20})
             end
         end
     end
 })
-
---Destroyer is used to destroy built nodes such as roads and buildings.
--- minetest.register_item("builda:destroyer", {
---     description = S("Destroyer"),
---     inventory_image = "builda_destroyer.png",
---     type = "tool",
---     on_place = function(itemstack, user, pointed_thing)
---         if pointed_thing.type == "node" then
---             local pos = pointed_thing.under
-
---             if minetest.is_protected(pos, user:get_player_name()) then
---                 minetest.record_protection_violation(pos, user:get_player_name())
---                 minetest.sound_play("builda_error", {pos = pointed_thing.below, max_hear_distance = 20})
---                 return
---             end
-
---             local node = minetest.get_node(pos)
---             if PlayerHasEnergy(user, 5) and minetest.get_item_group(node.name, "consumer") > 0 and logistics.remove(pos) then
---                 AddPlayerEnergy(user, -5)
-
---                 --'explode' the node.
---                 minetest.add_particlespawner({
---                     amount = 10,
---                     time = 0.2,
---                     minpos={x=pos.x-0.5, y=pos.y-0.5, z=pos.z-0.5},
---                     maxpos={x=pos.x+0.5, y=pos.y-0.5, z=pos.z+0.5},
---                     minvel={x=-4, y=2, z=-4},
---                     maxvel={x=4, y=4, z=4},
---                     texture = "builda_craft_default.png",
---                     minsize = 1,
---                     maxsize = 1,
---                     minexptime = 0.2,
---                     maxexptime = 0.2,
---                 })
---                 minetest.sound_play("builda_explode", {pos = pos, max_hear_distance = 20})
---             else
---                 minetest.sound_play("builda_error", {pos = pointed_thing.below, max_hear_distance = 20})
---             end
---         end
---     end
--- })
-
 
 local modpath = minetest.get_modpath("builda")
 dofile(modpath.."/guide.lua")

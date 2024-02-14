@@ -45,10 +45,6 @@ function _G.worksaver.print_area()
     if x_max ~= nil then
         size = (x_max - x_min + 1) * (y_max - y_min + 1) * (z_max - z_min + 1)
     end
-    minetest.debug("size: " .. tostring(size)..
-        "  x: "..(x_max - x_min + 1).." ("..x_min..", "..x_max..")"..
-        "  y: "..(y_max - y_min + 1).." ("..y_min..", "..y_max..")"..
-        "  z: "..(z_max - z_min + 1).." ("..z_min..", "..z_max..")")
 end
 
 function _G.worksaver.save_area_to_file(min_pos, max_pos)
