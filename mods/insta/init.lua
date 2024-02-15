@@ -6,7 +6,7 @@ local insta = {
 
 _G.insta = insta
 
--- #################### INTRO FORM ####################
+-- #################### LIFE CYCLE STUFF ####################
 
 local build_time = 120 -- 7 minutes
 
@@ -17,136 +17,13 @@ _G.insta.goal_co2 = goal_co2
 local goal_population = 1000 -- more than is better
 _G.insta.goal_population = goal_population
 
-local hud_id_intro_text_title
-local hud_id_intro_text
-local hud_id_intro_image
-
-local hudform = {
-    "formspec_version[4]",
-    "size[0,0]",
-    "image[0,0;20,13;transparent.png]",
-    "modal[]",
-}
-
-local function showIntroHUD(player)
-    print("showIntroHUD")
-    if player then
-        -- Add the image
-        hud_id_intro_image = player:hud_add({
-            hud_elem_type = "image",
-            position = {x = 0.5, y = 0.5},
-            scale = {x = 1, y = 1},
-            text = "intro_hud_image.png",
-        })
-
-        -- Add the text title
-        hud_id_intro_text_title = player:hud_add({
-            hud_elem_type = "text",
-            position = {x = 0.5, y = 0.28},
-            scale = {x = 1, y = 1},
-            size = {x = 3, y = 2},
-            text = "Deine Aufgabe: Baue eine Stadt",
-            number = 0x000000,  -- Text color: black
-            alignment = {x = 0, y = 0},
-        })
-
-        -- Add the text
-        hud_id_intro_text = player:hud_add({
-            hud_elem_type = "text",
-            position = {x = 0.5, y = 0.4},
-            scale = {x = 1, y = 1},
-            size = {x = 2.5, y = 1.5},
-            text = "für mindestens " .. goal_population .. " Menschen\n" ..
-                "mit maximal " .. goal_co2 .. "t CO2 Footprint\n" ..
-                "für höchtens " .. goal_money .. " Millionen € Kosten.",
-            number = 0x000000,  -- Text color: black
-            alignment = {x = 0, y = 0},
-        })
-
-        minetest.show_formspec(player:get_player_name(), "insta:start", table.concat(hudform, ""))
-        print("showIntroHUD done for " .. player:get_player_name())
-    end
-end
-
-local function hideIntroHUD(player)
-    print("hideIntroHUD")
-    if player then
-        if hud_id_intro_text_title then
-            player:hud_remove(hud_id_intro_text_title)
-        end
-        if hud_id_intro_text then
-            player:hud_remove(hud_id_intro_text)
-        end
-        if hud_id_intro_image then
-            player:hud_remove(hud_id_intro_image)
-        end
-    end
-end
-
-local function showResultHUD(player)
-    print("showResultHUD")
-    if player then
-        -- Add the image
-        hud_id_intro_image = player:hud_add({
-            hud_elem_type = "image",
-            position = {x = 0.5, y = 0.5},
-            scale = {x = 1, y = 1},
-            text = "intro_hud_image.png",
-        })
-
-        local title = "Deine Stadt ist fertig!"
-
-        -- Add the text title
-        hud_id_intro_text_title = player:hud_add({
-            hud_elem_type = "text",
-            position = {x = 0.5, y = 0.28},
-            scale = {x = 1, y = 1},
-            size = {x = 3, y = 2},
-            text = title,
-            number = 0x000000,  -- Text color: black
-            alignment = {x = 0, y = 0},
-        })
-
-        -- Add the text
-        hud_id_intro_text = player:hud_add({
-            hud_elem_type = "text",
-            position = {x = 0.5, y = 0.4},
-            scale = {x = 1, y = 1},
-            size = {x = 2.5, y = 1.5},
-            text = "Hier leben " .. 
-                math.floor(player:get_meta():get_float("population")+0.5) .. " Menschen.\n" ..
-                "Du hast " .. 
-                math.floor(player:get_meta():get_float("co2")+0.5) .. "t CO2 verbraucht und\n" ..
-                player:get_meta():get_int("costs") .. " Millionen € ausgegeben.",
-            number = 0x000000,  -- Text color: black
-            alignment = {x = 0, y = 0},
-        })
-
-        minetest.show_formspec(player:get_player_name(), "insta:result", table.concat(hudform, ""))
-    end
-end
-
-local function hideResultHUD(player)
-    print("hideResultHUD")
-    if player then
-        if hud_id_intro_text_title then
-            player:hud_remove(hud_id_intro_text_title)
-        end
-        if hud_id_intro_text then
-            player:hud_remove(hud_id_intro_text)
-        end
-        if hud_id_intro_image then
-            player:hud_remove(hud_id_intro_image)
-        end
-    end
-end
-
+local forms = dofile(minetest.get_modpath("insta").."/forms.lua")
 
 local function start_countdown()
     local players = minetest.get_connected_players()
 
     local function on_end(player)
-        showResultHUD(player)
+        forms.showResultHUD(player)
     end
 
     local function on_warn(player)
@@ -158,21 +35,20 @@ local function start_countdown()
 end
 
 minetest.register_on_joinplayer(function(player)
-    showIntroHUD(player)
+    forms.showIntroHUD(player)
 end)
 
-minetest.register_on_player_receive_fields(function(player, formname, fields)
-    print("on_player_receive_fields: " .. formname)
+minetest.register_on_player_receive_fields(function(player, formname, _fields)
     if (formname == "insta:start") then
         _G.worksaver.Reset_world()
         start_countdown()
-        hideIntroHUD(player)
+        forms.hideIntroHUD(player)
     end
 
     if (formname == "insta:result") then
-        hideResultHUD(player)
+        forms.hideResultHUD(player)
         minetest.after(0.1, function()
-            showIntroHUD(player)
+            forms.showIntroHUD(player)
         end)
     end
 
