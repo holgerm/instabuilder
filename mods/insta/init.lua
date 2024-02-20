@@ -19,14 +19,14 @@ _G.insta.goal_population = goal_population
 
 local forms = dofile(minetest.get_modpath("insta").."/forms.lua")
 
-local function start_countdown()
+function insta.start_countdown()
     local players = minetest.get_connected_players()
 
     local function on_end(player)
         forms.showResultHUD(player)
     end
 
-    local function on_warn(player)
+    local function on_warn(_player)
         _G.countdown.set_color(0xFF22AA) -- set text to red
     end
 
@@ -36,22 +36,6 @@ end
 
 minetest.register_on_joinplayer(function(player)
     forms.showIntroHUD(player)
-end)
-
-minetest.register_on_player_receive_fields(function(player, formname, _fields)
-    if (formname == "insta:start") then
-        _G.worksaver.Reset_world()
-        start_countdown()
-        forms.hideIntroHUD(player)
-    end
-
-    if (formname == "insta:result") then
-        forms.hideResultHUD(player)
-        minetest.after(0.1, function()
-            forms.showIntroHUD(player)
-        end)
-    end
-
 end)
 
 

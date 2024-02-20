@@ -129,6 +129,7 @@ minetest.register_on_joinplayer(function(player)
         "builda:residential_concrete 1",
         "builda:residential_brick 1",
         "builda:residential_wood 1",
+        "builda:destroyer 1",
     }
 
     --Initialise the buildbar (hotbar).
@@ -364,6 +365,40 @@ minetest.register_item("builda:residential_wood", {
                 AddPlayerCosts(user, -residential_wood_cost)
                 AddPlayerPopulation(user, - residential_wood_population)
                 AddPlayerCO2(user, -residential_wood_co2)
+            end
+        end
+    end
+})
+
+--Destroyer is used to destroy built nodes such as roads and buildings.
+minetest.register_item("builda:destroyer", {
+    description = S("Destroyer"),
+    inventory_image = "builda_destroyer.png",
+    type = "tool",
+    on_place = function(itemstack, user, pointed_thing)
+        if pointed_thing.type == "node" then
+            local pos = pointed_thing.under
+
+            local node = minetest.get_node(pos)
+            if logistics.remove(pos) then
+                --'explode' the node.
+                minetest.add_particlespawner({
+                    amount = 10,
+                    time = 0.2,
+                    minpos={x=pos.x-0.5, y=pos.y-0.5, z=pos.z-0.5},
+                    maxpos={x=pos.x+0.5, y=pos.y-0.5, z=pos.z+0.5},
+                    minvel={x=-4, y=2, z=-4},
+                    maxvel={x=4, y=4, z=4},
+                    texture = "builda_craft_default.png",
+                    minsize = 1,
+                    maxsize = 1,
+                    minexptime = 0.2,
+                    maxexptime = 0.2,
+                })
+                minetest.sound_play("builda_explode", {pos = pos, max_hear_distance = 20})
+            else
+                minetest.sound_play("builda_error", {pos = pos, max_hear_distance = 20})
+                minetest.debug("Failed to remove node.")
             end
         end
     end

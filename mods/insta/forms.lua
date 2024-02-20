@@ -11,6 +11,126 @@ local hudform = {
     "modal[]",
 }
 
+local hudhelpform = {
+    "formspec_version[4]",
+    "size[0.1,0.1]",
+    "position[10,10]",
+}
+
+-- #################### HELP FLAGS, HUDS and FORMS ####################
+
+local hud_id_help_image
+local hud_id_help_text
+
+local function showHelpHUD(player, helptext)
+
+    local screen_width = 1920 -- get the screen's width
+    local screen_height = 1200 -- get the screen's height
+
+    local distance_from_left = 0 -- the distance from the left border
+    local distance_from_top = 0 -- the distance from the top border
+
+    local image_position = {
+        x = distance_from_left / screen_width,
+        y = distance_from_top / screen_height,
+    }
+
+    local help_image_width = 663
+    local help_image_height = 361
+
+    local text_position = {
+        x = (distance_from_left + (0.5 * help_image_width) - 130) / screen_width,
+        y = (distance_from_top + (0.5 * help_image_height) - 72) / screen_height,
+    }
+
+    if player then
+        -- Add the image
+        hud_id_help_image = player:hud_add({
+            hud_elem_type = "image",
+            position = image_position, --{x = 0.026, y = 0.0042},
+            scale = {x = 0.8, y = 0.8} ,
+            text = "help_blank.png",
+            alignment = {x = 1, y = 1},
+        })
+
+        minetest.debug("Text_Position: x: " .. text_position.x .. " y: " .. text_position.y)
+
+
+        -- Add the text
+        hud_id_help_text = player:hud_add({
+            hud_elem_type = "text",
+            position = text_position,
+            scale = 1,
+            size = {x = 2.6, y = 2.6},
+            text = helptext,
+            number = 0x000000,  -- Text color: black
+            alignment = {x = 0, y = 0},
+        })
+
+        --minetest.show_formspec(player:get_player_name(), "insta:help", table.concat(hudhelpform, ""))
+    end
+end
+
+local function hideHelpHUD(player)
+    if player then
+        if hud_id_help_image then
+            player:hud_remove(hud_id_help_image)
+        end
+        if hud_id_help_text then
+            player:hud_remove(hud_id_help_text)
+        end
+    end
+end
+
+minetest.register_globalstep(function()
+    for _, player in ipairs(minetest.get_connected_players()) do
+        local controls = player:get_player_control()
+        if controls.aux1 then
+            -- The aux1 key is being pressed
+            hideHelpHUD(player)
+            forms.hideIntroHUD(player)
+            forms.hideResultHUD(player)
+            end
+    end
+end)
+
+
+local function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
+local help_default = {
+    start = {
+        show = 1,
+        text = "Am besten baust du erst\nein paar Strassen.\nDenn Gebäude müssen an\nStrassen liegen."
+    }
+}
+
+local help = deepcopy(help_default)
+
+local function reset_help()
+    help = deepcopy(help_default)
+end
+
+function forms.show_help(player, flag)
+    if help[flag] and help[flag].show > 0 then
+        help[flag].show = help[flag].show - 1
+        showHelpHUD(player, help[flag].text)
+    end
+end
+
+
 function forms.showIntroHUD(player)
     if player then
         -- Add the image
@@ -60,11 +180,17 @@ function forms.hideIntroHUD(player)
         if hud_id_intro_image then
             player:hud_remove(hud_id_intro_image)
         end
+
+        minetest.after(5, function()
+            forms.show_help(player, "start")
+        end)
     end
 end
 
 function forms.showResultHUD(player)
     if player then
+        hideHelpHUD(player)
+
         -- Add the image
         hud_id_intro_image = player:hud_add({
             hud_elem_type = "image",
@@ -118,6 +244,29 @@ function forms.hideResultHUD(player)
         end
     end
 end
+
+
+
+minetest.register_on_player_receive_fields(function(player, formname, _fields)
+    if (formname == "insta:start") then
+        _G.worksaver.Reset_world()
+        reset_help()
+        _G.insta.start_countdown()
+        forms.hideIntroHUD(player)
+    end
+
+    if (formname == "insta:result") then
+        forms.hideResultHUD(player)
+        minetest.after(0.1, function()
+            forms.showIntroHUD(player)
+        end)
+    end
+
+    if (formname == "insta:help") then
+        hideHelpHUD(player)
+    end
+
+end)
 
 
 return forms
