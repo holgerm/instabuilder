@@ -229,6 +229,18 @@ city.register_building("city:mall_d", {height = 1, mesh = "city_mall_d", kind = 
 city.register_building("city:mall_e", {height = 1, mesh = "city_mall_e", kind = "mall"})
 city.register_building("city:mall_f", {height = 1, mesh = "city_mall_f", kind = "mall", width = 2})
 
+city.register_building("city:green_1", {
+    height = 0.6,
+    mesh = "green_1",
+    kind = "green",
+    level = 1
+})
+city.register_building("city:green_2", {
+    height = 0.6,
+    mesh = "green_2",
+    kind = "green",
+    level = 2
+})
 city.register_building("city:residential_concrete_1", {
     height = 0.6,
     mesh = "insta_residential_concrete_1",
