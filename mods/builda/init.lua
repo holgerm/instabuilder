@@ -85,10 +85,6 @@ end
 
 local AddPlayerCO2 = function(player, coins)
     player:get_meta():set_int("co2", player:get_meta():get_int("co2") + coins);
-    if player:get_meta():get_int("co2") < 0 then
-        player:get_meta():set_int("co2", 0)
-        return false
-    end
     if hud_id_co2 then
         player:hud_change(hud_id_co2, "text", player:get_meta():get_int("co2") ..
             " / " .. _G.insta.goal_co2)
@@ -104,6 +100,7 @@ local AddPlayerCO2 = function(player, coins)
     end
     return true
 end
+
 
 
 minetest.hud_replace_builtin("health", nil)
@@ -126,6 +123,7 @@ minetest.register_on_joinplayer(function(player)
 
     local list = {
         "builda:road 1",
+        "builda:green 1",
         "builda:residential_concrete 1",
         "builda:residential_brick 1",
         "builda:residential_wood 1",
@@ -269,9 +267,12 @@ minetest.register_decoration({
 local road_cost = 3
 local road_co2 = 5
 
-local residential_concrete_cost = 8
-local residential_concrete_co2 = 13
-local residential_concrete_population = 12
+local green_cost = { 3, 10,}
+local green_co2 = { -5, -25, }
+
+local residential_concrete_cost = { 8, 20, 40, 80 }
+local residential_concrete_co2 = { 13, 30, 60, 120 }
+local residential_concrete_population = { 12, 24, 48, 96 }
 
 local residential_brick_cost = 6
 local residential_brick_co2 = 5
@@ -297,17 +298,32 @@ minetest.register_item("builda:road", {
     end
 })
 
+minetest.register_item("builda:green", {
+    description = S("Green area in the city"),
+    inventory_image = "green.png",
+    type = "tool",
+    on_place = function(itemstack, user, pointed_thing)
+        if pointed_thing.type == "node" then
+            insta.build_green(pointed_thing, user)
+        end
+    end,
+})
+
+local function AddPoints4Green(user, from_level, to_level) 
+    AddPlayerCosts(user, green_cost[to_level] - (green_cost[from_level] or 0))
+    AddPlayerCO2(user, green_co2[to_level] - (green_co2[from_level] or 0))
+end
+
+_G.builda.AddPoints4Green = AddPoints4Green
+
+
 minetest.register_item("builda:residential_concrete", {
     description = S("Residential Concrete House"),
     inventory_image = "house_concrete.png",
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if insta.build_residential_concrete(pointed_thing, user) then
-                AddPlayerCosts(user, residential_concrete_cost)
-                AddPlayerPopulation(user, residential_concrete_population)
-                AddPlayerCO2(user, residential_concrete_co2)
-            end
+            insta.build_residential_concrete(pointed_thing, user)
         end
     end,
     on_use = function(itemstack, user, pointed_thing)
@@ -321,6 +337,16 @@ minetest.register_item("builda:residential_concrete", {
     end
 
 })
+
+local function AddPoints4ResidentialConcrete(user, from_level, to_level) 
+    AddPlayerCosts(user, (residential_concrete_cost[to_level] or 0) - (residential_concrete_cost[from_level] or 0))
+    AddPlayerCO2(user, (residential_concrete_co2[to_level] or 0) - (residential_concrete_co2[from_level] or 0))
+    AddPlayerPopulation(user, (residential_concrete_population[to_level] or 0) -
+        (residential_concrete_population[from_level] or 0))
+end
+
+_G.builda.AddPoints4ResidentialConcrete = AddPoints4ResidentialConcrete
+
 
 minetest.register_item("builda:residential_brick", {
     description = S("Residential Brick House"),
