@@ -274,13 +274,13 @@ local residential_concrete_cost = { 8, 20, 40, 80 }
 local residential_concrete_co2 = { 13, 30, 60, 120 }
 local residential_concrete_population = { 12, 24, 48, 96 }
 
-local residential_brick_cost = 6
-local residential_brick_co2 = 5
-local residential_brick_population = 8
+local residential_brick_cost = { 6, 15, 30, 60 }
+local residential_brick_co2 = { 5, 12, 24, 48 }
+local residential_brick_population = { 8, 16, 32, 64 }
 
-local residential_wood_cost = 4
-local residential_wood_co2 = 2
-local residential_wood_population = 4
+local residential_wood_cost = { 4, 10 }
+local residential_wood_co2 = { 2, 5 }
+local residential_wood_population = { 4, 8 }
 
 minetest.register_item("builda:road", {
     description = S("Road"),
@@ -328,11 +328,7 @@ minetest.register_item("builda:residential_concrete", {
     end,
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if insta.unbuild_residential_concrete(pointed_thing, user) then
-                AddPlayerCosts(user, -residential_concrete_cost)
-                AddPlayerPopulation(user, -residential_concrete_population)
-                AddPlayerCO2(user, -residential_concrete_co2)
-            end
+            insta.unbuild_residential_concrete(pointed_thing, user)
         end
     end
 
@@ -354,23 +350,25 @@ minetest.register_item("builda:residential_brick", {
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if insta.build_residential_brick(pointed_thing, user) then
-                AddPlayerCosts(user, residential_brick_cost)
-                AddPlayerPopulation(user, residential_brick_population)
-                AddPlayerCO2(user, residential_brick_co2)
-            end
+            insta.build_residential_brick(pointed_thing, user)
         end
     end,
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if insta.unbuild_residential_brick(pointed_thing, user) then
-                AddPlayerCosts(user, -residential_brick_cost)
-                AddPlayerPopulation(user, -residential_brick_population)
-                AddPlayerCO2(user, -residential_brick_co2)
-            end
+            insta.unbuild_residential_brick(pointed_thing, user)
         end
     end
 })
+
+local function AddPoints4ResidentialBrick(user, from_level, to_level) 
+    AddPlayerCosts(user, (residential_brick_cost[to_level] or 0) - (residential_brick_cost[from_level] or 0))
+    AddPlayerCO2(user, (residential_brick_co2[to_level] or 0) - (residential_brick_co2[from_level] or 0))
+    AddPlayerPopulation(user, (residential_brick_population[to_level] or 0) -
+        (residential_brick_population[from_level] or 0))
+end
+
+_G.builda.AddPoints4ResidentialBrick = AddPoints4ResidentialBrick
+
 
 minetest.register_item("builda:residential_wood", {
     description = S("Residential Wooden House"),
@@ -378,23 +376,25 @@ minetest.register_item("builda:residential_wood", {
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if insta.build_residential_wood(pointed_thing, user) then
-                AddPlayerCosts(user, residential_wood_cost)
-                AddPlayerPopulation(user, residential_wood_population)
-                AddPlayerCO2(user, residential_wood_co2)
-            end
+            insta.build_residential_wood(pointed_thing, user)
         end
     end,
     on_use = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            if insta.unbuild_residential_wood(pointed_thing, user) then
-                AddPlayerCosts(user, -residential_wood_cost)
-                AddPlayerPopulation(user, - residential_wood_population)
-                AddPlayerCO2(user, -residential_wood_co2)
-            end
+            insta.unbuild_residential_wood(pointed_thing, user)
         end
     end
 })
+
+local function AddPoints4ResidentialWood(user, from_level, to_level) 
+    AddPlayerCosts(user, (residential_wood_cost[to_level] or 0) - (residential_wood_cost[from_level] or 0))
+    AddPlayerCO2(user, (residential_wood_co2[to_level] or 0) - (residential_wood_co2[from_level] or 0))
+    AddPlayerPopulation(user, (residential_wood_population[to_level] or 0) -
+        (residential_wood_population[from_level] or 0))
+end
+
+_G.builda.AddPoints4ResidentialWood = AddPoints4ResidentialWood
+
 
 --Destroyer is used to destroy built nodes such as roads and buildings.
 minetest.register_item("builda:destroyer", {
