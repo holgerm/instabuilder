@@ -27,16 +27,16 @@ local function showHelpHUD(player, helptext)
     local screen_width = 1920 -- get the screen's width
     local screen_height = 1200 -- get the screen's height
 
-    local distance_from_left = 0 -- the distance from the left border
-    local distance_from_top = 0 -- the distance from the top border
-
-    local image_position = {
-        x = distance_from_left / screen_width,
-        y = distance_from_top / screen_height,
-    }
+    local distance_from_left = -40 -- the distance from the left border
+    local distance_from_top = -20 -- the distance from the top border
 
     local help_image_width = 663
     local help_image_height = 361
+
+    local image_position = {
+        x = (distance_from_left + (help_image_width / 2)) / screen_width,
+        y = (distance_from_top + (help_image_height / 2)) / screen_height,
+    }
 
     local text_position = {
         x = (distance_from_left + (0.5 * help_image_width) - 130) / screen_width,
@@ -50,7 +50,7 @@ local function showHelpHUD(player, helptext)
             position = image_position, --{x = 0.026, y = 0.0042},
             scale = {x = 0.8, y = 0.8} ,
             text = "help_blank.png",
-            alignment = {x = 1, y = 1},
+            alignment = {x = 0, y = 0},
         })
 
         minetest.debug("Text_Position: x: " .. text_position.x .. " y: " .. text_position.y)
@@ -59,7 +59,7 @@ local function showHelpHUD(player, helptext)
         -- Add the text
         hud_id_help_text = player:hud_add({
             hud_elem_type = "text",
-            position = text_position,
+            position = image_position,
             scale = 1,
             size = {x = 2.6, y = 2.6},
             text = helptext,
