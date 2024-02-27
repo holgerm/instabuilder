@@ -264,8 +264,8 @@ minetest.register_decoration({
 
 
 
-local road_cost = 3
-local road_co2 = 5
+local street_cost = 3
+local street_co2 = 5
 
 local green_cost = { 3, 10,}
 local green_co2 = { -5, -25, }
@@ -291,8 +291,8 @@ minetest.register_item("builda:road", {
         _G.worksaver.print_area()
         if pointed_thing.type == "node" then
             if logistics.place("city:street_off", pointed_thing.above, user) then
-                AddPlayerCosts(user, road_cost)
-                AddPlayerCO2(user, road_co2)
+                AddPlayerCosts(user, street_cost)
+                AddPlayerCO2(user, street_co2)
             end
         end
     end
@@ -334,7 +334,7 @@ minetest.register_item("builda:residential_concrete", {
 
 })
 
-local function AddPoints4ResidentialConcrete(user, from_level, to_level) 
+local function AddPoints4ResidentialConcrete(user, from_level, to_level)
     AddPlayerCosts(user, (residential_concrete_cost[to_level] or 0) - (residential_concrete_cost[from_level] or 0))
     AddPlayerCO2(user, (residential_concrete_co2[to_level] or 0) - (residential_concrete_co2[from_level] or 0))
     AddPlayerPopulation(user, (residential_concrete_population[to_level] or 0) -
@@ -395,6 +395,17 @@ end
 
 _G.builda.AddPoints4ResidentialWood = AddPoints4ResidentialWood
 
+local function print_table(t, indent)
+    indent = indent or '  '
+    for key, value in pairs(t) do
+        if type(value) == "table" then
+            print(indent .. key .. ":")
+            print_table(value, indent .. '  ')
+        else
+            print(indent .. key .. ": " .. tostring(value) .. " (type: " .. type(value) .. ")")
+        end
+    end
+end
 
 --Destroyer is used to destroy built nodes such as roads and buildings.
 minetest.register_item("builda:destroyer", {
@@ -405,7 +416,23 @@ minetest.register_item("builda:destroyer", {
         if pointed_thing.type == "node" then
             local pos = pointed_thing.under
 
-            local node = minetest.get_node(pos)
+            local thing = minetest.get_node(pos)
+            local item = minetest.registered_items[thing.name]
+            if item then
+                if thing.name == "city:street_off" then
+                    AddPlayerCosts(user, -street_cost)
+                    AddPlayerCO2(user, -street_co2)
+                elseif item.kind == "green" then
+                    AddPoints4Green(user, 1, 0)
+                elseif item.kind == "residential_concrete" then
+                    AddPoints4ResidentialConcrete(user, item.level, 0)
+                elseif item.kind == "residential_brick" then
+                    AddPoints4ResidentialBrick(user, item.level, 0)
+                elseif item.kind == "residential_wood" then
+                    AddPoints4ResidentialWood(user, item.level, 0)
+                end
+            end
+
             if logistics.remove(pos) then
                 --'explode' the node.
                 minetest.add_particlespawner({

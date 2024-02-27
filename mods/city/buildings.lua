@@ -107,6 +107,7 @@ function city.register_building(name, def)
         },
         node_placement_prediction = "",
         tiles = city.load_material("city", def.mesh..".mtl"),
+        kind = kind,
         level = def.level,
     }
 
@@ -124,7 +125,7 @@ function city.register_building(name, def)
             {-0.5, -0.5, -0.5, -0.5+1*width, -0.5+1*def.height, 0.5},
         },
     }
-  
+
     node_def.on_construct = function(pos)
         if width > 1 then
             local dir = minetest.facedir_to_dir(minetest.get_node(pos).param2)

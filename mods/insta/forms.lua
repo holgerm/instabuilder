@@ -53,9 +53,6 @@ local function showHelpHUD(player, helptext)
             alignment = {x = 0, y = 0},
         })
 
-        minetest.debug("Text_Position: x: " .. text_position.x .. " y: " .. text_position.y)
-
-
         -- Add the text
         hud_id_help_text = player:hud_add({
             hud_elem_type = "text",
