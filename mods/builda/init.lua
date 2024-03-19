@@ -29,7 +29,7 @@ minetest.register_on_joinplayer(function(player)
 
     --Give the player their starting coins.
     if player:get_meta():contains("costs") == false then
-        AddPlayerCosts(player, 0)
+--        AddPlayerCosts(player, 0)
     end
 
     local list = {
