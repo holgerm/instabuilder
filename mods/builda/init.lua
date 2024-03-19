@@ -5,7 +5,7 @@ local builda = {
 _G.builda = builda
 
 dofile(minetest.get_modpath("insta").."/countdown.lua")
-dofile(minetest.get_modpath("insta").."/status_hud.lua")
+dofile(minetest.get_modpath("insta").."/status.lua")
 
 --builda implements the gameplay logic of Builda City.
 --In this gamemode, players have energy and are required to build
@@ -49,8 +49,11 @@ minetest.register_on_joinplayer(function(player)
     player:hud_set_flags({healthbar=false, breathbar=false, wielditem=false})
     player:hud_set_hotbar_image("builda_empty.png")
 
-    _G.builda.set_status_hud(player)
-    _G.builda.Reset_state()
+ --   _G.status.StatusManager.new(player)
+ --   _G.status.StatusManager:addStatusBar("co2", 100)
+
+ --   _G.builda.Init_status_hud(player)
+  --  _G.builda.Reset_state()
 
     --Setup camera, the player is inside an energy distrubution craft
     --and is able to fly through single-node spaces.
@@ -144,7 +147,7 @@ minetest.register_item("builda:road", {
         if pointed_thing.type == "node" then
             if logistics.place("city:street_off", pointed_thing.above, user) then
                 _G.builda.AddPlayerCosts(user, street_cost)
-                _G.builda.AddPlayerCO2(user, street_co2)
+   --             _G.status.StatusManager:getStatusBar(user, "co2"):add(street_co2)
             end
         end
     end
@@ -152,7 +155,7 @@ minetest.register_item("builda:road", {
 
 minetest.register_item("builda:green", {
     description = S("Green area in the city"),
-    inventory_image = "green.png",
+    inventory_image = "nature.png",
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
@@ -163,7 +166,7 @@ minetest.register_item("builda:green", {
 
 local function AddPoints4Green(user, from_level, to_level) 
     _G.builda.AddPlayerCosts(user, (green_cost[to_level] or 0) - (green_cost[from_level] or 0))
-    _G.builda.AddPlayerCO2(user, (green_co2[to_level] or 0) - (green_co2[from_level] or 0))
+ --   _G.status.StatusManager:getStatusBar("co2"):add((green_co2[to_level] or 0) - (green_co2[from_level] or 0))
 end
 
 _G.builda.AddPoints4Green = AddPoints4Green
@@ -188,7 +191,7 @@ minetest.register_item("builda:residential_concrete", {
 
 local function AddPoints4ResidentialConcrete(user, from_level, to_level)
     _G.builda.AddPlayerCosts(user, (residential_concrete_cost[to_level] or 0) - (residential_concrete_cost[from_level] or 0))
-    _G.builda.AddPlayerCO2(user, (residential_concrete_co2[to_level] or 0) - (residential_concrete_co2[from_level] or 0))
+ --   _G.status.StatusManager:getStatusBar("co2"):add((residential_concrete_co2[to_level] or 0) - (residential_concrete_co2[from_level] or 0))
     _G.builda.AddPlayerPopulation(user, (residential_concrete_population[to_level] or 0) -
         (residential_concrete_population[from_level] or 0))
 end
@@ -214,7 +217,7 @@ minetest.register_item("builda:residential_brick", {
 
 local function AddPoints4ResidentialBrick(user, from_level, to_level) 
     _G.builda.AddPlayerCosts(user, (residential_brick_cost[to_level] or 0) - (residential_brick_cost[from_level] or 0))
-    _G.builda.AddPlayerCO2(user, (residential_brick_co2[to_level] or 0) - (residential_brick_co2[from_level] or 0))
+    _G.status.StatusManager:getStatusBar("co2"):add((residential_brick_co2[to_level] or 0) - (residential_brick_co2[from_level] or 0))
     _G.builda.AddPlayerPopulation(user, (residential_brick_population[to_level] or 0) -
         (residential_brick_population[from_level] or 0))
 end
@@ -240,24 +243,12 @@ minetest.register_item("builda:residential_wood", {
 
 local function AddPoints4ResidentialWood(user, from_level, to_level) 
     _G.builda.AddPlayerCosts(user, (residential_wood_cost[to_level] or 0) - (residential_wood_cost[from_level] or 0))
-    _G.builda.AddPlayerCO2(user, (residential_wood_co2[to_level] or 0) - (residential_wood_co2[from_level] or 0))
+    _G.status.StatusManager:getStatusBar("co2"):add((residential_wood_co2[to_level] or 0) - (residential_wood_co2[from_level] or 0))
     _G.builda.AddPlayerPopulation(user, (residential_wood_population[to_level] or 0) -
         (residential_wood_population[from_level] or 0))
 end
 
 _G.builda.AddPoints4ResidentialWood = AddPoints4ResidentialWood
-
-local function print_table(t, indent)
-    indent = indent or '  '
-    for key, value in pairs(t) do
-        if type(value) == "table" then
-            print(indent .. key .. ":")
-            print_table(value, indent .. '  ')
-        else
-            print(indent .. key .. ": " .. tostring(value) .. " (type: " .. type(value) .. ")")
-        end
-    end
-end
 
 --Destroyer is used to destroy built nodes such as roads and buildings.
 minetest.register_item("builda:destroyer", {
@@ -273,7 +264,7 @@ minetest.register_item("builda:destroyer", {
             if item then
                 if thing.name == "city:street_off" then
                     _G.builda.AddPlayerCosts(user, -street_cost)
-                    _G.builda.AddPlayerCO2(user, -street_co2)
+                    _G.status.StatusManager:getStatusBar("co2"):add(-street_co2)
                 elseif item.kind == "green" then
                     AddPoints4Green(user, 1, 0)
                 elseif item.kind == "residential_concrete" then

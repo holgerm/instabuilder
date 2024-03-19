@@ -234,7 +234,8 @@ city.register_building("city:green_1", {
     height = 0.6,
     mesh = "green_1",
     kind = "green",
-    level = 1
+    level = 1,
+    tiles = { "green_1.png"},
 })
 city.register_building("city:green_2", {
     height = 0.6,
