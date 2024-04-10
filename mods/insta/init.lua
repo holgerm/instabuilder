@@ -8,13 +8,13 @@ _G.insta = insta
 
 -- #################### LIFE CYCLE STUFF ####################
 
-local build_time = 120 -- 7 minutes
+local build_time = 300 -- 7 minutes
 
-local goal_money = 300 -- less than is better
-_G.insta.goal_money = goal_money
-local goal_co2 = 10000 -- less than is better
-_G.insta.goal_co2 = goal_co2
+local goal_money = 17000 -- less than is better
+local goal_co2 = 1000 -- less than is better
 local goal_population = 1000 -- more than is better
+_G.insta.goal_money = goal_money
+_G.insta.goal_co2 = goal_co2
 _G.insta.goal_population = goal_population
 
 local forms = dofile(minetest.get_modpath("insta").."/forms.lua")
@@ -68,11 +68,11 @@ function insta.build_green(pointed_thing, builder)
     if current.name == "air" then
         local road = logistics.node_near(pos, builder, "street")
         if not road then
-            print("No road")
+            print("No road at "..minetest.pos_to_string(pos))
             return false
         else
             if logistics.place(city.buildings["green"][1].."_off", pos, builder) then
-                _G.builda.AddPoints4Green(builder, 0, 1)
+ --               _G.builda.AddPoints4Green(builder, 0, 1)
             end
         end
     end
@@ -98,7 +98,7 @@ function insta.build_residential_concrete(pointed_thing, builder)
     if current.name == "air" then
         local road = logistics.node_near(pos, builder, "street")
         if not road then
-            print("No road")
+            print("No road at "..minetest.pos_to_string(pos))
             return false
         else
             if logistics.place(city.buildings["residential_concrete"][1].."_off", pos, builder) then
@@ -159,7 +159,7 @@ function insta.build_residential_brick(pointed_thing, builder)
     if current.name == "air" then
         local road = logistics.node_near(pos, builder, "street")
         if not road then
-            print("No road")
+            print("No road at "..minetest.pos_to_string(pos))
             return false
         else
             if logistics.place(city.buildings["residential_brick"][1].."_off", pos, builder) then
@@ -197,11 +197,11 @@ function insta.unbuild_residential_brick(pointed_thing, builder)
     if current.name:sub(1,#"city:residential_brick") == "city:residential_brick" and item_def.level then
         if item_def.level > 1 then
             if logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, builder) then
-                _G.builda.AddPoints4ResidentialBrick(builder, item_def.level, item_def.level - 1)
+ --               _G.builda.AddPoints4ResidentialBrick(builder, item_def.level, item_def.level - 1)
             end
         elseif item_def.level == 1 then
             if logistics.remove(pos, builder) then
-                _G.builda.AddPoints4ResidentialBrick(builder, item_def.level, 0)
+ --               _G.builda.AddPoints4ResidentialBrick(builder, item_def.level, 0)
             end
         end
     end
@@ -220,11 +220,11 @@ function insta.build_residential_wood(pointed_thing, builder)
     if current.name == "air" then
         local road = logistics.node_near(pos, builder, "street")
         if not road then
-            print("No road")
+            print("No road at "..minetest.pos_to_string(pos))
             return false
         else
             if logistics.place(city.buildings["residential_wood"][1].."_off", pos, builder) then
-                _G.builda.AddPoints4ResidentialWood(builder, 0, 1)
+               _G.builda.AddPoints4ResidentialWood(builder, 0, 1)
             end
         end
     end

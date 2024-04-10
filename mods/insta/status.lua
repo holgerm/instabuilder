@@ -1,8 +1,10 @@
 _G.status = {}
 
-function _G.status.show_info()
+local function show_info()
     minetest.debug("Hi, here is the ".. minetest.get_current_modname() .. " mod!")
 end
+
+_G.status.ShowInfo = show_info
 
 dofile(minetest.get_modpath("insta").."/util.lua")
 
@@ -13,27 +15,11 @@ dofile(minetest.get_modpath("insta").."/util.lua")
 
 
 
+local status_bars = {}
+_G.status.Bars = status_bars
 
-local StatusBar = {}
-StatusBar.__index = StatusBar
-
-function StatusBar.new(player, name, goal)
-    local self = setmetatable({}, StatusBar)
-    self.player = player
-    self.name = name
-    self.goal = goal
-    self.hud_id = nil
-    self.hud_elem_type = "statbar"
-    self.position = {x=1, y=0}
-    self.text = "cost.png"
-    self.number = 2
-    self.size = {x=64, y=64}
-    self.offset = {x=-64-10, y=5}
-    return self
-end
-
-function StatusBar:show()
-    self.player:hud_add({
+local function show(bar)
+    bar.player:hud_add({
         hud_elem_type = "image",
         position = {x=1, y=0},
         text = "grey.png",
@@ -41,142 +27,128 @@ function StatusBar:show()
         scale = {x = 5, y = 1},
     })
 
-    self.hud_id = self.player:hud_add({
-        hud_elem_type = self.hud_elem_type,
-        position = self.position,
-        text = self.text,
-        number = self.number,
-        size = self.size,
-        offset = self.offset,
+    bar.hud_id = bar.player:hud_add({
+        hud_elem_type = bar.hud_elem_type,
+        position = bar.position,
+        text = bar.text,
+        number = bar.number,
+        size = bar.size,
+        offset = bar.offset,
     })
 
-    self.hud_id_bar = self.player:hud_add({
+    bar.hud_id_bar = bar.player:hud_add({
         hud_elem_type = "image",
         position = {x=1, y=0},
         text = "red.png",
         offset = {x=-36, y=64+40},
         scale = {x = 1, y = 1},
     })
-    self.hud_id_text = self.player:hud_add({
+    bar.hud_id_text = bar.player:hud_add({
         hud_elem_type = "text",
         position = {x=1, y=0},
-        text = math.floor(self.player:get_meta():get_float(self.name)+0.5) .. " / " .. self.goal,
+        text = math.floor(bar.player:get_meta():get_float(bar.name)+0.5) .. " / " .. bar.goal,
         number = 0xffffff,
         size = {x=3, y=3+5},
         offset = {x=-90, y=64+5},
         alignment = {x=-1, y=1},
     })
-    self.hud_id_icon = self.player:hud_add({
+    bar.hud_id_icon = bar.player:hud_add({
         hud_elem_type = "statbar",
         position = {x=1, y=0},
-        text = self.name .. ".png",
+        text = bar.name .. ".png",
         number = 2,
         size = {x=48, y=48+5},
         offset = {x=-64, y=64+7},
     })
 end
 
-function StatusBar:add(delta)
+_G.status.Show = show
+
+function _G.status.addStatusBar(player, name, goal)
+    local sb = {}
+    sb.player = player
+    sb.name = name
+    sb.goal = goal
+    sb.hud_id = nil
+    sb.hud_elem_type = "statbar"
+    sb.position = {x=1, y=0}
+    sb.text = "cost.png"
+    sb.number = 2
+    sb.size = {x=64, y=64}
+    sb.offset = {x=-64-10, y=5}
+    status_bars[player:get_player_name().."_"..name] = sb
+    show(sb)
+    print("showed")
+end
+
+function _G.status.getBar(player, name)
+    return status_bars[player:get_player_name().."_"..name]
+end
+
+local function add(bar, delta)
+    print("StatusBar:add")
     if not delta or delta == 0 then
         return
     end
 
-    local oldVal = self.player:get_meta():get_int(self.name)
-    self.player:get_meta():set_int(self.name, oldVal + delta);
+    local oldVal = bar.player:get_meta():get_int(bar.name)
+    bar.player:get_meta():set_int(bar.name, oldVal + delta);
 
-    self.player:hud_change(self.hud_id_text, "text", self.player:get_meta():get_int(self.name) ..
-        " / " ..self.goal)
-    if self.player:get_meta():get_int(self.name) > self.goal then
+    bar.player:hud_change(bar.hud_id_text, "text", bar.player:get_meta():get_int(bar.name) ..
+        " / " ..bar.goal)
+    if bar.player:get_meta():get_int(bar.name) > bar.goal then
         -- Change the text color to red
-        self.player:hud_change(self.hud_id, "number", 0xFF0000)
-        self.player:hud_change(self.hud_id_icon, "text", self.name .. "_red.png")
+        bar.player:hud_change(bar.hud_id, "number", 0xFF0000)
+        bar.player:hud_change(bar.hud_id_icon, "text", bar.name .. "_red.png")
     else
         -- Change the text color to white
-        self.player:hud_change(self.hud_id, "number", 0xFFFFFF)
-        self.player:hud_change(self.hud_id_icon, "text", self.name .. ".png")
+        bar.player:hud_change(bar.hud_id, "number", 0xFFFFFF)
+        bar.player:hud_change(bar.hud_id_icon, "text", bar.name .. ".png")
     end
 
-    self.player:hud_change(self.hud_id_text, "text", math.floor(self.player:get_meta():get_float(self.name)+0.5)..
-        " / " .. self.goal)
-    self.player:hud_change(self.hud_id_bar, "text", "red.png") -- TODO
-    self.player:hud_change(self.hud_id, "text", "cost.png")
+    bar.player:hud_change(bar.hud_id_text, "text", math.floor(bar.player:get_meta():get_float(bar.name)+0.5)..
+        " / " .. bar.goal)
+    bar.player:hud_change(bar.hud_id_bar, "text", "red.png") -- TODO
+    bar.player:hud_change(bar.hud_id, "text", "cost.png")
 end
 
-function StatusBar:reset()
-    self.player:get_meta():set_int(self.name, 0)
-    self.player:hud_change(self.hud_id_text, "text", math.floor(self.player:get_meta():get_float(self.name)+0.5)..
-        " / " .. self.goal)
-    self.player:hud_change(self.hud_id_bar, "text",self.name ..  "red.png") -- TODO
-    self.player:hud_change(self.hud_id_icon, "text", self.name .. ".png")
+_G.status.Add = add
+
+local function reset(bar)
+    bar.player:get_meta():set_int(bar.name, 0)
+    bar.player:hud_change(bar.hud_id_text, "text", math.floor(bar.player:get_meta():get_float(bar.name)+0.5)..
+        " / " .. bar.goal)
+    bar.player:hud_change(bar.hud_id_bar, "text",bar.name ..  "red.png") -- TODO
+    bar.player:hud_change(bar.hud_id_icon, "text", bar.name .. ".png")
 end
 
-local StatusManager = {}
-local statusManagers = {}
-
-local instance = nil
-
--- Creates a new instance of StatusManager for a given player
-function StatusManager.new(player)
-    -- if statusManagers[player:get_player_name()] then
-    --     return statusManagers[player:get_player_name()]
-    -- end
-
-    -- local sm  = {}
-    -- sm.player = player
-    -- sm.bars = {}
-
-    -- statusManagers[player:get_player_name()] = sm
-    -- return sm
-end
-
---- Adds a status bar for a player.
-function StatusManager.addStatusBar(player, name, goal)
-    if instance == nil then
-        instance = StatusManager.new()
-    end
-
-    instance.bars[name] = StatusBar.new(instance.player, name, goal)
-    instance.bars[name]:show()
-end
-
---- Resets the status manager.
-function StatusManager.reset(player)
-    if statusManagers[player:get_player_name()] == nil then
-        instance = StatusManager.new()
-    end
-
-    for _, bar in pairs(instance.bars) do
-        bar:reset()
-    end
-end
-
-function StatusManager.getStatusBar(player, name)
-    if instance == nil then
-        instance = StatusManager.new(player)
-    end
-
-    return instance.bars[name]
-end
-
-_G.status.StatusManager = StatusManager
+_G.status.Reset = reset
 
 local hud_id_money
 local hud_id_money_icon
+local hud_id_co2
+local hud_id_co2_icon
 local hud_id_population
 local hud_id_population_icon
 
 local function reset_state()
-    -- for _, player in ipairs(minetest.get_connected_players()) do
+    print("reset_state")
+    for _, player in ipairs(minetest.get_connected_players()) do
 
-    --     player:get_meta():set_int("costs", 0)
-    --     player:get_meta():set_int("population", 0)
-    --     player:get_meta():set_int("co2", 0)
-    --     player:hud_change(hud_id_money, "text", 0 .. " / " .. _G.insta.goal_money)
-    --     player:hud_change(hud_id_population, "text", 0 .. " / " .. _G.insta.goal_population)
-    --     -- Change the text color to red
-    --     player:hud_change(hud_id_population, "number", 0xFF0000)
-    --     player:hud_change(hud_id_population_icon, "text", "population_red.png")
-    -- end
+        player:get_meta():set_int("costs", 0)
+        player:get_meta():set_int("population", 0)
+        player:get_meta():set_int("co2", 0)
+        player:hud_change(hud_id_money, "text", 0 .. " / " .. _G.insta.goal_money)
+        player:hud_change(hud_id_population, "text", 0 .. " / " .. _G.insta.goal_population)
+        -- Change the text color to red
+        --player:hud_change(hud_id_co2, "number", 0xFF0000)
+        player:hud_change(hud_id_co2_icon, "text", "co2.png")
+        player:hud_change(hud_id_co2, "text", 0 .. " / " .. _G.insta.goal_co2)
+        -- Change the text color to red
+        player:hud_change(hud_id_population, "number", 0xFF0000)
+        player:hud_change(hud_id_population_icon, "text", "population_red.png")
+    end
+    print("done reset_state")
 end
 
 _G.builda.Reset_state = reset_state
@@ -202,6 +174,28 @@ local init_status_hud = function(player)
         offset = {x=-90, y=10},
         alignment = {x=-1, y=1},
     })
+    -- Population Count
+    hud_id_co2 = player:hud_add({
+        name = "co2",
+        hud_elem_type = "text",
+        position = {x=1, y=0},
+        text = math.floor(player:get_meta():get_float("co2")+0.5) .. " / " .. _G.insta.goal_co2,
+        number = 0xffffff,
+        size = {x=3, y=3+5},
+        offset = {x=-90, y=64+5},
+        alignment = {x=-1, y=1},
+    })
+    -- Population Icon
+    hud_id_co2_icon = player:hud_add({
+        hud_elem_type = "statbar",
+        position = {x=1, y=0},
+        text = "co2.png",
+        number = 2,
+        size = {x=48, y=48+5},
+        offset = {x=-64, y=64+7},
+    })
+    --sb.size = {x=64, y=64}
+    --sb.offset = {x=-64-10, y=5}
     -- Population Count
     hud_id_population = player:hud_add({
         name = "population",
@@ -230,6 +224,7 @@ _G.builda.Init_status_hud = init_status_hud
 
 --returns true if the player can afford.
 local AddPlayerCosts = function(player, coins)
+    print("AddPlayerCosts: " .. coins)
     player:get_meta():set_int("costs", player:get_meta():get_int("costs") + coins);
     if player:get_meta():get_int("costs") < 0 then
         player:get_meta():set_int("costs", 0)
@@ -249,10 +244,37 @@ local AddPlayerCosts = function(player, coins)
         end
     end
 
+    print("done AddPlayerCosts")
     return true
 end
 
 _G.builda.AddPlayerCosts = AddPlayerCosts
+
+
+local AddPlayerCo2 = function(player, coins)
+    player:get_meta():set_int("co2", player:get_meta():get_int("co2") + coins);
+    if player:get_meta():get_int("co2") < 0 then
+        player:get_meta():set_int("co2", 0)
+        -- Change the text color to red
+        player:hud_change(hud_id_co2, "number", 0xFF0000)
+        return false
+    end
+    if hud_id_co2 then
+        player:hud_change(hud_id_co2, "text", player:get_meta():get_int("co2") .. 
+            " / " .. _G.insta.goal_co2)
+        if player:get_meta():get_int("co2") > _G.insta.goal_co2 then
+            -- Change the text color to red
+            player:hud_change(hud_id_co2, "number", 0xFF0000)
+            player:hud_change(hud_id_co2_icon, "text", "co2_red.png")
+        else
+            player:hud_change(hud_id_co2, "number", 0xFFFFFF)
+            player:hud_change(hud_id_co2_icon, "text", "co2.png")
+        end
+    end
+    return true
+end
+
+_G.builda.AddPlayerCo2 = AddPlayerCo2
 
 
 local AddPlayerPopulation = function(player, coins)

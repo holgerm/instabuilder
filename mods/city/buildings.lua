@@ -74,6 +74,8 @@ end
 function city.register_building(name, def)
     local kind = def.kind or ""
     local width = def.width or 1
+    def.height = def.height or 1
+
     if not city.buildings[kind] then
         city.buildings[kind] = {}
     end
@@ -86,6 +88,10 @@ function city.register_building(name, def)
     table.insert(city.buildings[kind], name)
     table.insert(city.buildings_by_width[kind][width], name)
 
+    if not def.tiles then
+        def.tiles = city.load_material("city", def.mesh..".mtl")
+    end
+
     local node_def = {
         mesh = def.mesh..".obj",
         drawtype = "mesh",
@@ -95,7 +101,7 @@ function city.register_building(name, def)
             network = "city",
         },
         connects_to = "group:street",
-        resources = function(pos)
+        resources = function(_pos)
             return {
                 population = 1,
             }
@@ -106,12 +112,10 @@ function city.register_building(name, def)
             height = def.height,
         },
         node_placement_prediction = "",
-        tiles = city.load_material("city", def.mesh..".mtl"),
+        tiles = def.tiles,
         kind = kind,
         level = def.level,
     }
-
-    def.height = def.height or 1
 
     node_def.selection_box = {
         type = "fixed",
@@ -127,10 +131,12 @@ function city.register_building(name, def)
     }
 
     node_def.on_construct = function(pos)
+        print("on_construct: kind: " .. def.kind .. ", level: " .. def.level)
         if width > 1 then
             local dir = minetest.facedir_to_dir(minetest.get_node(pos).param2)
             minetest.set_node(vector.subtract(pos, {x=-dir.z, y=dir.y, z=dir.x}), {name = "city:space"})
         end
+        print("done")
     end
 
     node_def.on_destruct = function(pos)
@@ -141,14 +147,14 @@ function city.register_building(name, def)
     end
 
     local decayed_node_def = table.copy(node_def)
-
-    --replace lit windows with dark windows
-    for i,v in ipairs(decayed_node_def.tiles) do
-        if v.color.window then
-            decayed_node_def.tiles[i].color = 0xFF1D2222
+    if not def.tiles then
+        --replace lit windows with dark windows
+        for i,v in ipairs(decayed_node_def.tiles) do
+            if v.color.window then
+                decayed_node_def.tiles[i].color = 0xFF1D2222
+            end
         end
     end
-
     local suffix = "_off"
     node_def.groups["consumer"] = 1
 
@@ -156,164 +162,142 @@ function city.register_building(name, def)
     minetest.register_node(name..suffix, decayed_node_def)
 end
 
-city.register_building("city:house_long_a", {
-    mesh = "city_house_long_a",
-    width = 2,
-    height = 0.75,
-    self_sufficient = true, 
-    kind = "house",
-})
-city.register_building("city:house_long_b", {
-    mesh = "city_house_long_b",
-    width = 2,
-    height = 0.75,
-    self_sufficient = true, 
-    kind = "house",
-})
-city.register_building("city:house_long_c", {
-    mesh = "city_house_long_c",
-    width = 2,
-    height = 0.75,
-    kind = "house",
-})
-city.register_building("city:house_long_d", {
-    mesh = "city_house_long_d",
-    width = 2,
-    height = 0.75,
-    kind = "house",
-})
-city.register_building("city:house_long_e", {
-    mesh = "city_house_long_e",
-    width = 2,
-    height = 0.75,
-    kind = "house",
-})
-
---TODO maybe load this information from the file-structure?
-
-city.register_building("city:house_a", {height = 0.75, mesh = "city_house_a", kind = "house"})
-city.register_building("city:house_b", {height = 0.6, mesh = "city_house_b", kind = "house"})
-city.register_building("city:house_c", {height = 0.8, mesh = "city_house_c", kind = "house"})
-city.register_building("city:house_d", {height = 0.5, mesh = "city_house_d", kind = "house"})
-city.register_building("city:house_e", {height = 0.5, mesh = "city_house_e", kind = "house"})
-city.register_building("city:house_f", {height = 0.7, mesh = "city_house_f", kind = "house", self_sufficient = true})
-city.register_building("city:house_g", {height = 0.7, mesh = "city_house_g", kind = "house"})
-city.register_building("city:house_h", {height = 0.6, mesh = "city_house_h", kind = "house", self_sufficient = true})
-city.register_building("city:house_i", {height = 0.65, mesh = "city_house_i", kind = "house"})
-city.register_building("city:house_j", {height = 0.7, mesh = "city_house_j", kind = "house"})
-city.register_building("city:house_k", {height = 0.7, mesh = "city_house_k", kind = "house"})
-city.register_building("city:house_l", {height = 0.7, mesh = "city_house_l", kind = "house"})
-city.register_building("city:house_m", {height = 0.7, mesh = "city_house_m", kind = "house"})
-city.register_building("city:house_n", {height = 0.6, mesh = "city_house_n", kind = "house"})
-city.register_building("city:house_o", {height = 0.8, mesh = "city_house_o", kind = "house"})
-city.register_building("city:house_p", {height = 0.62, mesh = "city_house_p", kind = "house"})
-
-city.register_building("city:skyscraper_a", {height = 2.31, mesh = "city_skyscraper_a", kind = "skyscraper"})
-city.register_building("city:skyscraper_b", {height = 3.6, mesh = "city_skyscraper_b", kind = "skyscraper"})
-city.register_building("city:skyscraper_c", {height = 2.9, mesh = "city_skyscraper_c", kind = "skyscraper"})
-city.register_building("city:skyscraper_d", {height = 4.23, mesh = "city_skyscraper_d", kind = "skyscraper"})
-city.register_building("city:skyscraper_e", {height = 2, mesh = "city_skyscraper_e", kind = "skyscraper"})
-city.register_building("city:skyscraper_f", {height = 3.28, mesh = "city_skyscraper_f", kind = "skyscraper"})
-
-city.register_building("city:shop_a", {height = 0.75, mesh = "city_shop_a", kind = "shop"})
-city.register_building("city:shop_b", {height = 0.75, mesh = "city_shop_b", kind = "shop"})
-city.register_building("city:shop_c", {height = 0.75, mesh = "city_shop_c", kind = "shop"})
-city.register_building("city:shop_d", {height = 0.75, mesh = "city_shop_d", kind = "shop"})
-city.register_building("city:shop_e", {height = 0.75, mesh = "city_shop_e", kind = "shop", width = 2})
-city.register_building("city:shop_f", {height = 0.75, mesh = "city_shop_e", kind = "shop", width = 2})
-
-
-city.register_building("city:mall_a", {height = 1, mesh = "city_mall_a", kind = "mall", width = 2})
-city.register_building("city:mall_b", {height = 1, mesh = "city_mall_b", kind = "mall"})
-city.register_building("city:mall_c", {height = 1, mesh = "city_mall_c", kind = "mall"})
-city.register_building("city:mall_d", {height = 1, mesh = "city_mall_d", kind = "mall"})
-city.register_building("city:mall_e", {height = 1, mesh = "city_mall_e", kind = "mall"})
-city.register_building("city:mall_f", {height = 1, mesh = "city_mall_f", kind = "mall", width = 2})
 
 city.register_building("city:green_1", {
     height = 0.6,
     mesh = "green_1",
+    tiles = {"green_1.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "green",
     level = 1,
-    tiles = { "green_1.png"},
+	selection_box = {
+		type = 'fixed',
+		fixed = {-.5, -.5, -.3, .5, .15, .4},
+		},
+	collision_box = {
+		type = 'fixed',
+		fixed = {-.5, -.5, -.3, .5, .15, .4},
+		},
 })
 city.register_building("city:green_2", {
     height = 0.6,
     mesh = "green_2",
+    tiles = {"green_2.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "green",
-    level = 2
+    level = 2,
+	selection_box = {
+		type = 'fixed',
+		fixed = {-.5, -.5, -.3, .5, .15, .4},
+		},
+	collision_box = {
+		type = 'fixed',
+		fixed = {-.5, -.5, -.3, .5, .15, .4},
+		},
 })
 city.register_building("city:residential_concrete_1", {
-    height = 0.6,
-    mesh = "insta_residential_concrete_1",
+    height = 1 ,
+    mesh = "residential_concrete_1",
+    tiles = {"residential_concrete_1.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "residential_concrete",
     level = 1
 })
 city.register_building("city:residential_concrete_2", {
-    height = 0.8,
-    mesh = "insta_residential_concrete_2",
+    height = 1 ,
+    mesh = "residential_concrete_2",
+    tiles = {"residential_concrete_2.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "residential_concrete",
     level = 2
 })
 city.register_building("city:residential_concrete_3", {
-    height = 1,
-    mesh = "insta_residential_concrete_3",
+    height = 1 ,
+    mesh = "residential_concrete_3",
+    tiles = {"residential_concrete_3.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "residential_concrete",
     level = 3
 })
 city.register_building("city:residential_concrete_4", {
-    height = 2,
-    mesh = "insta_residential_concrete_4",
+    height = 1 ,
+    mesh = "residential_concrete_4",
+    tiles = {"residential_concrete_4.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "residential_concrete",
     level = 4
 })
 
 city.register_building("city:residential_brick_1", {
-    height = 0.6,
-    mesh = "insta_residential_brick_1",
+    height = 1 ,
+    mesh = "residential_brick_1",
+    tiles = {"residential_brick_1.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "residential_brick",
     level = 1
 })
 city.register_building("city:residential_brick_2", {
-    height = 0.8,
-    mesh = "insta_residential_brick_2",
+    height = 1 ,
+    mesh = "residential_brick_2",
+    tiles = {"residential_brick_2.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "residential_brick",
     level = 2
 })
 city.register_building("city:residential_brick_3", {
-    height = 1,
-    mesh = "insta_residential_brick_3",
+    height = 1 ,
+    mesh = "residential_brick_3",
+    tiles = {"residential_brick_3.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "residential_brick",
     level = 3
 })
 city.register_building("city:residential_brick_4", {
-    height = 2,
-    mesh = "insta_residential_brick_4",
+    height = 1 ,
+    mesh = "residential_brick_4",
+    tiles = {"residential_brick_4.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
     kind = "residential_brick",
     level = 4
 })
 
 city.register_building("city:residential_wood_1", {
     height = 0.6,
-    mesh = "insta_residential_wood_1",
+    tiles = {"residential_wood_1.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
+    mesh = "residential_wood_1",
     kind = "residential_wood",
     level = 1
 })
 city.register_building("city:residential_wood_2", {
-    height = 0.8,
-    mesh = "insta_residential_wood_2",
+    height = 1,
+    tiles = {"residential_wood_2.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
+    mesh = "residential_wood_2",
     kind = "residential_wood",
     level = 2
 })
--- city.register_building("city:residential_wood_3", {
---     height = 1,
---     mesh = "city_residential_wood_3",
---     kind = "residential_wood",
---     level = 3
--- })
--- city.register_building("city:residential_wood_4", {
---     height = 2,
---     mesh = "city_residential_wood_4",
---     kind = "residential_wood",
---     level = 4
--- })

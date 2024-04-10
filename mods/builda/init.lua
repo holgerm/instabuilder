@@ -25,11 +25,11 @@ minetest.register_item(":", {
 
 --We need to attach the Energy and Humans HUD counts.
 --Humans is top left, Energy is top right.
-minetest.register_on_joinplayer(function(player)    
+minetest.register_on_joinplayer(function(player)
 
     --Give the player their starting coins.
     if player:get_meta():contains("costs") == false then
---        AddPlayerCosts(player, 0)
+        _G.builda.AddPlayerCosts(player, 0)
     end
 
     local list = {
@@ -49,11 +49,10 @@ minetest.register_on_joinplayer(function(player)
     player:hud_set_flags({healthbar=false, breathbar=false, wielditem=false})
     player:hud_set_hotbar_image("builda_empty.png")
 
- --   _G.status.StatusManager.new(player)
- --   _G.status.StatusManager:addStatusBar("co2", 100)
+    -- _G.status.addStatusBar(player, "co2", 100)
 
- --   _G.builda.Init_status_hud(player)
-  --  _G.builda.Reset_state()
+    _G.builda.Init_status_hud(player)
+    _G.builda.Reset_state()
 
     --Setup camera, the player is inside an energy distrubution craft
     --and is able to fly through single-node spaces.
@@ -119,35 +118,34 @@ minetest.register_decoration({
 
 
 
-local street_cost = 3
-local street_co2 = 5
+local street_cost = 75
+local street_co2 = 2
 
-local green_cost = { 3, 10,}
-local green_co2 = { -5, -25, }
+local green_cost = { 20, 30, }
+local green_co2 = { -80, -140, }
 
-local residential_concrete_cost = { 8, 20, 40, 80 }
-local residential_concrete_co2 = { 13, 30, 60, 120 }
-local residential_concrete_population = { 12, 24, 48, 96 }
+local residential_concrete_cost = { 300, 600, 1200, 2400,}
+local residential_concrete_co2 = { 100, 200, 400, 800, }
+local residential_concrete_population = { 4, 10, 40, 160 }
 
-local residential_brick_cost = { 6, 15, 30, 60 }
-local residential_brick_co2 = { 5, 12, 24, 48 }
-local residential_brick_population = { 8, 16, 32, 64 }
+local residential_brick_cost = { 350, 700, 1400, 2800,}
+local residential_brick_co2 = { 60, 120, 240, 480, }
+local residential_brick_population = { 4, 10, 25, 60 }
 
-local residential_wood_cost = { 4, 10 }
-local residential_wood_co2 = { 2, 5 }
-local residential_wood_population = { 4, 8 }
+local residential_wood_cost = { 400, 800, }
+local residential_wood_co2 = { 20, 40, }
+local residential_wood_population = { 4, 10, }
 
 minetest.register_item("builda:road", {
     description = S("Road"),
     inventory_image = "builda_road.png",
     type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
+    on_place = function(_itemstack, user, pointed_thing)
         _G.worksaver.update_area(pointed_thing.above)
-        _G.worksaver.print_area()
         if pointed_thing.type == "node" then
             if logistics.place("city:street_off", pointed_thing.above, user) then
                 _G.builda.AddPlayerCosts(user, street_cost)
-   --             _G.status.StatusManager:getStatusBar(user, "co2"):add(street_co2)
+                _G.builda.AddPlayerCo2(user, street_co2)
             end
         end
     end
@@ -166,7 +164,7 @@ minetest.register_item("builda:green", {
 
 local function AddPoints4Green(user, from_level, to_level) 
     _G.builda.AddPlayerCosts(user, (green_cost[to_level] or 0) - (green_cost[from_level] or 0))
- --   _G.status.StatusManager:getStatusBar("co2"):add((green_co2[to_level] or 0) - (green_co2[from_level] or 0))
+    _G.builda.AddPlayerCo2(user, (green_co2[to_level] or 0) - (green_co2[from_level] or 0))
 end
 
 _G.builda.AddPoints4Green = AddPoints4Green
@@ -191,7 +189,7 @@ minetest.register_item("builda:residential_concrete", {
 
 local function AddPoints4ResidentialConcrete(user, from_level, to_level)
     _G.builda.AddPlayerCosts(user, (residential_concrete_cost[to_level] or 0) - (residential_concrete_cost[from_level] or 0))
- --   _G.status.StatusManager:getStatusBar("co2"):add((residential_concrete_co2[to_level] or 0) - (residential_concrete_co2[from_level] or 0))
+    _G.builda.AddPlayerCo2(user, (residential_concrete_co2[to_level] or 0) - (residential_concrete_co2[from_level] or 0))
     _G.builda.AddPlayerPopulation(user, (residential_concrete_population[to_level] or 0) -
         (residential_concrete_population[from_level] or 0))
 end
@@ -217,7 +215,7 @@ minetest.register_item("builda:residential_brick", {
 
 local function AddPoints4ResidentialBrick(user, from_level, to_level) 
     _G.builda.AddPlayerCosts(user, (residential_brick_cost[to_level] or 0) - (residential_brick_cost[from_level] or 0))
-    _G.status.StatusManager:getStatusBar("co2"):add((residential_brick_co2[to_level] or 0) - (residential_brick_co2[from_level] or 0))
+    _G.builda.AddPlayerCo2(user, (residential_brick_co2[to_level] or 0) - (residential_brick_co2[from_level] or 0))
     _G.builda.AddPlayerPopulation(user, (residential_brick_population[to_level] or 0) -
         (residential_brick_population[from_level] or 0))
 end
@@ -243,7 +241,7 @@ minetest.register_item("builda:residential_wood", {
 
 local function AddPoints4ResidentialWood(user, from_level, to_level) 
     _G.builda.AddPlayerCosts(user, (residential_wood_cost[to_level] or 0) - (residential_wood_cost[from_level] or 0))
-    _G.status.StatusManager:getStatusBar("co2"):add((residential_wood_co2[to_level] or 0) - (residential_wood_co2[from_level] or 0))
+    _G.builda.AddPlayerCo2(user, (residential_wood_co2[to_level] or 0) - (residential_wood_co2[from_level] or 0))
     _G.builda.AddPlayerPopulation(user, (residential_wood_population[to_level] or 0) -
         (residential_wood_population[from_level] or 0))
 end

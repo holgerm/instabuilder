@@ -157,7 +157,7 @@ function forms.showIntroHUD(player)
             size = {x = 2.5, y = 1.5},
             text = "für mindestens " .. _G.insta.goal_population .. " Menschen\n" ..
                 "mit maximal " .. _G.insta.goal_co2 .. "t CO2 Footprint\n" ..
-                "für höchtens " .. _G.insta.goal_money .. " Millionen € Kosten.",
+                "für höchtens " .. _G.insta.goal_money .. " Tausend € Kosten.",
             number = 0x000000,  -- Text color: black
             alignment = {x = 0, y = 0},
         })
@@ -219,7 +219,7 @@ function forms.showResultHUD(player)
                 math.floor(player:get_meta():get_float("population")+0.5) .. " Menschen.\n" ..
                 "Du hast " .. 
                 math.floor(player:get_meta():get_float("co2")+0.5) .. "t CO2 verbraucht und\n" ..
-                player:get_meta():get_int("costs") .. " Millionen € ausgegeben.",
+                player:get_meta():get_int("costs") .. " Tausend € ausgegeben.",
             number = 0x000000,  -- Text color: black
             alignment = {x = 0, y = 0},
         })
