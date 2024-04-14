@@ -1,5 +1,3 @@
-print("Init mods/polymap/init.lua")
-
 local S = minetest.get_translator("polymap")
 
 minetest.register_alias("mapgen_stone", "polymap:ground")

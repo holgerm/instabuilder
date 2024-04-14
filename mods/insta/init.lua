@@ -8,12 +8,12 @@ _G.insta = insta
 
 -- #################### LIFE CYCLE STUFF ####################
 
-local build_time = 300 -- 7 minutes
+local build_time = 60 -- 7 minutes
 
-local goal_money = 17000 -- less than is better
+local goal_costs = 17000 -- less than is better
 local goal_co2 = 1000 -- less than is better
 local goal_population = 1000 -- more than is better
-_G.insta.goal_money = goal_money
+_G.insta.goal_costs = goal_costs
 _G.insta.goal_co2 = goal_co2
 _G.insta.goal_population = goal_population
 
@@ -68,7 +68,6 @@ function insta.build_green(pointed_thing, builder)
     if current.name == "air" then
         local road = logistics.node_near(pos, builder, "street")
         if not road then
-            print("No road at "..minetest.pos_to_string(pos))
             return false
         else
             if logistics.place(city.buildings["green"][1].."_off", pos, builder) then
@@ -98,7 +97,6 @@ function insta.build_residential_concrete(pointed_thing, builder)
     if current.name == "air" then
         local road = logistics.node_near(pos, builder, "street")
         if not road then
-            print("No road at "..minetest.pos_to_string(pos))
             return false
         else
             if logistics.place(city.buildings["residential_concrete"][1].."_off", pos, builder) then
@@ -159,7 +157,6 @@ function insta.build_residential_brick(pointed_thing, builder)
     if current.name == "air" then
         local road = logistics.node_near(pos, builder, "street")
         if not road then
-            print("No road at "..minetest.pos_to_string(pos))
             return false
         else
             if logistics.place(city.buildings["residential_brick"][1].."_off", pos, builder) then
@@ -220,7 +217,6 @@ function insta.build_residential_wood(pointed_thing, builder)
     if current.name == "air" then
         local road = logistics.node_near(pos, builder, "street")
         if not road then
-            print("No road at "..minetest.pos_to_string(pos))
             return false
         else
             if logistics.place(city.buildings["residential_wood"][1].."_off", pos, builder) then
@@ -269,15 +265,15 @@ function insta.unbuild_residential_wood(pointed_thing, builder)
 end
 
 
--- ################# GATHERING THE AREA WORKED ON #################
-minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
-    -- This code will be executed whenever a player places a node
-    print(placer:get_player_name() .. " placed a " .. newnode.name .. " at " .. minetest.pos_to_string(pos))
-end)
+-- -- ################# GATHERING THE AREA WORKED ON #################
+-- minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
+--     -- This code will be executed whenever a player places a node
+--     print(placer:get_player_name() .. " placed a " .. newnode.name .. " at " .. minetest.pos_to_string(pos))
+-- end)
 
-minetest.register_on_dignode(function(pos, oldnode, digger)
-    -- This code will be executed whenever a player digs a node
-    print(digger:get_player_name() .. " dug a " .. oldnode.name .. " at " .. minetest.pos_to_string(pos))
-end)
+-- minetest.register_on_dignode(function(pos, oldnode, digger)
+--     -- This code will be executed whenever a player digs a node
+--     print(digger:get_player_name() .. " dug a " .. oldnode.name .. " at " .. minetest.pos_to_string(pos))
+-- end)
 
 

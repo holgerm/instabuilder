@@ -42,7 +42,7 @@ function city.load_material(mod, mtl)
     --this works with models exported from AssetForge.
     local mtl_file = io.open(models_path..mtl, "r")
     if not mtl_file then
-        print(mtl)
+        return {}
     end
     local tiles = {}
     for line in mtl_file:lines() do

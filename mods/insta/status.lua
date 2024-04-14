@@ -78,7 +78,6 @@ function _G.status.addStatusBar(player, name, goal)
     sb.offset = {x=-64-10, y=5}
     status_bars[player:get_player_name().."_"..name] = sb
     show(sb)
-    print("showed")
 end
 
 function _G.status.getBar(player, name)
@@ -86,7 +85,6 @@ function _G.status.getBar(player, name)
 end
 
 local function add(bar, delta)
-    print("StatusBar:add")
     if not delta or delta == 0 then
         return
     end
@@ -132,13 +130,12 @@ local hud_id_population
 local hud_id_population_icon
 
 local function reset_state()
-    print("reset_state")
     for _, player in ipairs(minetest.get_connected_players()) do
 
         player:get_meta():set_int("costs", 0)
         player:get_meta():set_int("population", 0)
         player:get_meta():set_int("co2", 0)
-        player:hud_change(hud_id_money, "text", 0 .. " / " .. _G.insta.goal_money)
+        player:hud_change(hud_id_money, "text", 0 .. " / " .. _G.insta.goal_costs)
         player:hud_change(hud_id_population, "text", 0 .. " / " .. _G.insta.goal_population)
         -- Change the text color to red
         --player:hud_change(hud_id_co2, "number", 0xFF0000)
@@ -148,7 +145,6 @@ local function reset_state()
         player:hud_change(hud_id_population, "number", 0xFF0000)
         player:hud_change(hud_id_population_icon, "text", "population_red.png")
     end
-    print("done reset_state")
 end
 
 _G.builda.Reset_state = reset_state
@@ -168,7 +164,7 @@ local init_status_hud = function(player)
         name = "coins",
         hud_elem_type = "text",
         position = {x=1, y=0},
-        text = player:get_meta():get_int("costs") .. " / " .. _G.insta.goal_money,
+        text = player:get_meta():get_int("costs") .. " / " .. _G.insta.goal_costs,
         number = 0xffffff,
         size = {x=3, y=3},
         offset = {x=-90, y=10},
@@ -224,15 +220,14 @@ _G.builda.Init_status_hud = init_status_hud
 
 --returns true if the player can afford.
 local AddPlayerCosts = function(player, coins)
-    print("AddPlayerCosts: " .. coins)
     player:get_meta():set_int("costs", player:get_meta():get_int("costs") + coins);
     if player:get_meta():get_int("costs") < 0 then
         player:get_meta():set_int("costs", 0)
         return false
     end
     if hud_id_money then
-        player:hud_change(hud_id_money, "text", player:get_meta():get_int("costs") .. " / " .. _G.insta.goal_money)
-        if player:get_meta():get_int("costs") > _G.insta.goal_money then
+        player:hud_change(hud_id_money, "text", player:get_meta():get_int("costs") .. " / " .. _G.insta.goal_costs)
+        if player:get_meta():get_int("costs") > _G.insta.goal_costs then
             -- Change the text color to red
             player:hud_change(hud_id_money, "number", 0xFF0000)
             player:hud_change(hud_id_money_icon, "text", "cost_red.png")
@@ -244,7 +239,6 @@ local AddPlayerCosts = function(player, coins)
         end
     end
 
-    print("done AddPlayerCosts")
     return true
 end
 

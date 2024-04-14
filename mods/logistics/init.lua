@@ -1,5 +1,3 @@
-print("Init mods/logistics/init.lua")
-
 --[[
     Logistics mod is a helper for creating and managing 
     solid-state logistic networks.   
