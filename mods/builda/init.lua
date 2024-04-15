@@ -262,7 +262,6 @@ minetest.register_item("builda:destroyer", {
             if item then
                 if thing.name == "city:street_off" then
                     _G.builda.AddPlayerCosts(user, -street_cost)
-                    _G.status.StatusManager:getStatusBar("co2"):add(-street_co2)
                 elseif item.kind == "green" then
                     AddPoints4Green(user, 1, 0)
                 elseif item.kind == "residential_concrete" then
