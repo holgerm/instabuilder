@@ -8,7 +8,7 @@ _G.insta = insta
 
 -- #################### LIFE CYCLE STUFF ####################
 
-local build_time = 60 -- 7 minutes
+local build_time = 37 -- 5 minutes
 
 local goal_costs = 17000 -- less than is better
 local goal_co2 = 1000 -- less than is better

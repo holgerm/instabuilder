@@ -32,7 +32,7 @@ local hud_state = {
 local function showHelpHUD(player, helptext)
 
     local screen_width = 1920 -- get the screen's width
-    local screen_height = 1200 -- get the screen's height
+    local screen_height = 1080 -- get the screen's height
 
     local distance_from_left = -40 -- the distance from the left border
     local distance_from_top = -20 -- the distance from the top border
@@ -289,6 +289,7 @@ end
 
 minetest.register_on_player_receive_fields(function(player, formname, _fields)
     if (formname == "insta:start") then
+        minetest.set_timeofday(0.5)
         _G.worksaver.Reset_world()
         reset_help()
         _G.insta.start_countdown()
