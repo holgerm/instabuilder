@@ -8,7 +8,7 @@ _G.insta = insta
 
 -- #################### LIFE CYCLE STUFF ####################
 
-local build_time = 37 -- 5 minutes
+local build_time = 300 -- 5 minutes
 
 local goal_costs = 17000 -- less than is better
 local goal_co2 = 1000 -- less than is better
@@ -55,73 +55,35 @@ local function print_details(item_name)
     end
 end
 
-
-function insta.build_green(pointed_thing, builder)
-    local pos = pointed_thing.above
-    -- in case we have abuilding we pointed too high and adjust it here
-    if pos.y == 10 then
-        pos = pointed_thing.under
-    end
+local function build(building_type, max_level, pointed_thing, player)
+    local pos = pointed_thing.under
+    pos.y = 9
     local current = minetest.get_node(pos)
 
     -- level 1 on plain ground only if street is nearby:
     if current.name == "air" then
-        local road = logistics.node_near(pos, builder, "street")
+        local road = logistics.node_near(pos, player, "street")
         if not road then
             return false
         else
-            if logistics.place(city.buildings["green"][1].."_off", pos, builder) then
- --               _G.builda.AddPoints4Green(builder, 0, 1)
+            if logistics.place(city.buildings[building_type][1].."_off", pos, player) then
+                _G.builda.AddPoints4Green(player, 0, 1)
             end
         end
     end
 
-    local building_type = "green"
-    local item_def = minetest.registered_items[current.name:sub(1,#"city:green_n")]
-    if current.name:sub(1,#"city:green") == "city:green" and item_def.level and item_def.level < 2 then
-        if logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, builder) then
-            _G.builda.AddPoints4Green(builder, item_def.level, item_def.level + 1)
+    local item_def = minetest.registered_items[current.name:sub(1,#("city:"..building_type.."_n"))]
+    if current.name:sub(1,#("city:"..building_type)) == "city:"..building_type and
+        item_def.level and item_def.level < max_level then
+        if logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, player) then
+            _G.builda.AddPoints4Green(player, item_def.level, item_def.level + 1)
         end
     end
 end
 
-function insta.build_residential_concrete(pointed_thing, builder)
-    local pos = pointed_thing.above
-    -- in case we have abuilding we pointed too high and adjust it here
-    if pos.y == 10 then
-        pos = pointed_thing.under
-    end
-    local current = minetest.get_node(pos)
-
-    -- level 1 on plain ground only if street is nearby:
-    if current.name == "air" then
-        local road = logistics.node_near(pos, builder, "street")
-        if not road then
-            return false
-        else
-            if logistics.place(city.buildings["residential_concrete"][1].."_off", pos, builder) then
-                _G.builda.AddPoints4ResidentialConcrete(builder, 0, 1)
-            end
-        end
-    end
-
-
-    -- level is 2 or higher on plain ground only if street is nearby:
-    local building_type = "residential_concrete"
-    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_concrete_n")]
-    if current.name:sub(1,#"city:residential_concrete") == "city:residential_concrete" and item_def.level and item_def.level < 4 then
-        if logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, builder) then
-            _G.builda.AddPoints4ResidentialConcrete(builder, item_def.level, item_def.level + 1)
-        end
-    end
-end
-
-function insta.unbuild_residential_concrete(pointed_thing, builder)
-    local pos = pointed_thing.above
-    -- in case we have abuilding we pointed too high and adjust it here
-    if pos.y > 9 then
-        pos = pointed_thing.under
-    end
+local function unbuild(building_type, pointed_thing, player)
+    local pos = pointed_thing.under
+    pos.y = 9
     local current = minetest.get_node(pos)
 
     -- level 1 on plain ground only if street is nearby:
@@ -130,150 +92,47 @@ function insta.unbuild_residential_concrete(pointed_thing, builder)
     end
 
     -- level is 2 or higher on plain ground only if street is nearby:
-    local building_type = "residential_concrete"
-    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_concrete_n")]
-    if current.name:sub(1,#"city:residential_concrete") == "city:residential_concrete" and item_def.level then
+    local item_def = minetest.registered_items[current.name:sub(1,#("city:"..building_type.."_n"))]
+    if current.name:sub(1,#("city:"..building_type)) == "city:"..building_type and item_def.level then
         if item_def.level > 1 then
-            if logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, builder) then
-                _G.builda.AddPoints4ResidentialConcrete(builder, item_def.level, item_def.level - 1)
+            if logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, player) then
+                _G.builda.AddPoints4Green(player, item_def.level, item_def.level - 1)
             end
         elseif item_def.level == 1 then
-            if logistics.remove(pos, builder) then
-                _G.builda.AddPoints4ResidentialConcrete(builder, item_def.level, 0)
+            if logistics.remove(pos, player) then
+                _G.builda.AddPoints4Green(player, item_def.level, 0)
             end
         end
     end
 end
 
-function insta.build_residential_brick(pointed_thing, builder)
-    local pos = pointed_thing.above
-    -- in case we have abuilding we pointed too high and adjust it here
-    if pos.y == 10 then
-        pos = pointed_thing.under
-    end
-    local current = minetest.get_node(pos)
+function insta.build_green(pointed_thing, builder)
+    build("green", 2, pointed_thing, builder)
+end
 
-    -- level 1 on plain ground only if street is nearby:
-    if current.name == "air" then
-        local road = logistics.node_near(pos, builder, "street")
-        if not road then
-            return false
-        else
-            if logistics.place(city.buildings["residential_brick"][1].."_off", pos, builder) then
-                _G.builda.AddPoints4ResidentialBrick(builder, 0, 1)
-            end
-        end
-    end
-    -- level is 2 or higher on plain ground only if street is nearby:
-    local building_type = "residential_brick"
-    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_brick_n")]
-    if current.name:sub(1,#"city:residential_brick") == "city:residential_brick" and item_def.level and item_def.level < 4 then
-        if logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, builder) then
-            _G.builda.AddPoints4ResidentialBrick(builder, item_def.level, item_def.level + 1)
-        end
-    end
+function insta.build_residential_concrete(pointed_thing, builder)
+    build("residential_concrete", 4, pointed_thing, builder)
+end
+
+function insta.unbuild_residential_concrete(pointed_thing, builder)
+    unbuild("residential_concrete", pointed_thing, builder)
+end
+
+function insta.build_residential_brick(pointed_thing, builder)
+    build("residential_brick", 4, pointed_thing, builder)
 end
 
 
 function insta.unbuild_residential_brick(pointed_thing, builder)
-    local pos = pointed_thing.above
-    -- in case we have abuilding we pointed too high and adjust it here
-    if pos.y > 9 then
-        pos = pointed_thing.under
-    end
-    local current = minetest.get_node(pos)
-
-    -- level 1 on plain ground only if street is nearby:
-    if current.name == "air" then
-        return false
-    end
-
-    -- level is 2 or higher on plain ground only if street is nearby:
-    local building_type = "residential_brick"
-    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_brick_n")]
-    if current.name:sub(1,#"city:residential_brick") == "city:residential_brick" and item_def.level then
-        if item_def.level > 1 then
-            if logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, builder) then
- --               _G.builda.AddPoints4ResidentialBrick(builder, item_def.level, item_def.level - 1)
-            end
-        elseif item_def.level == 1 then
-            if logistics.remove(pos, builder) then
- --               _G.builda.AddPoints4ResidentialBrick(builder, item_def.level, 0)
-            end
-        end
-    end
+    unbuild("residential_brick", pointed_thing, builder)
 end
 
 
 function insta.build_residential_wood(pointed_thing, builder)
-    local pos = pointed_thing.above
-    -- in case we have abuilding we pointed too high and adjust it here
-    if pos.y == 10 then
-        pos = pointed_thing.under
-    end
-    local current = minetest.get_node(pos)
-
-    -- level 1 on plain ground only if street is nearby:
-    if current.name == "air" then
-        local road = logistics.node_near(pos, builder, "street")
-        if not road then
-            return false
-        else
-            if logistics.place(city.buildings["residential_wood"][1].."_off", pos, builder) then
-               _G.builda.AddPoints4ResidentialWood(builder, 0, 1)
-            end
-        end
-    end
-    -- level is 2 or higher on plain ground only if street is nearby:
-    local building_type = "residential_wood"
-    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_wood_n")]
-    if current.name:sub(1,#"city:residential_wood") == "city:residential_wood" and item_def.level and item_def.level < 2 then
-        if logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, builder) then
-            _G.builda.AddPoints4ResidentialWood(builder, item_def.level, item_def.level + 1)
-        end
-    end
+    build("residential_wood", 2, pointed_thing, builder)
 end
 
 
 function insta.unbuild_residential_wood(pointed_thing, builder)
-    local pos = pointed_thing.above
-    -- in case we have abuilding we pointed too high and adjust it here
-    if pos.y > 9 then
-        pos = pointed_thing.under
-    end
-    local current = minetest.get_node(pos)
-
-    -- level 1 on plain ground only if street is nearby:
-    if current.name == "air" then
-        return false
-    end
-
-    -- level is 2 or higher on plain ground only if street is nearby:
-    local building_type = "residential_wood"
-    local item_def = minetest.registered_items[current.name:sub(1,#"city:residential_wood_n")]
-    if current.name:sub(1,#"city:residential_wood") == "city:residential_wood" and item_def.level then
-        if item_def.level > 1 then
-            if logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, builder) then
-                _G.builda.AddPoints4ResidentialWood(builder, item_def.level, item_def.level - 1)
-            end
-        elseif item_def.level == 1 then
-            if logistics.remove(pos, builder) then
-                _G.builda.AddPoints4ResidentialWood(builder, item_def.level, 0)
-            end
-        end
-    end
+    unbuild("residential_wood", pointed_thing, builder)
 end
-
-
--- -- ################# GATHERING THE AREA WORKED ON #################
--- minetest.register_on_placenode(function(pos, newnode, placer, oldnode, itemstack, pointed_thing)
---     -- This code will be executed whenever a player places a node
---     print(placer:get_player_name() .. " placed a " .. newnode.name .. " at " .. minetest.pos_to_string(pos))
--- end)
-
--- minetest.register_on_dignode(function(pos, oldnode, digger)
---     -- This code will be executed whenever a player digs a node
---     print(digger:get_player_name() .. " dug a " .. oldnode.name .. " at " .. minetest.pos_to_string(pos))
--- end)
-
-

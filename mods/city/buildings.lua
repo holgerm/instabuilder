@@ -131,12 +131,10 @@ function city.register_building(name, def)
     }
 
     node_def.on_construct = function(pos)
-        print("on_construct: kind: " .. def.kind .. ", level: " .. def.level)
         if width > 1 then
             local dir = minetest.facedir_to_dir(minetest.get_node(pos).param2)
             minetest.set_node(vector.subtract(pos, {x=-dir.z, y=dir.y, z=dir.x}), {name = "city:space"})
         end
-        print("done")
     end
 
     node_def.on_destruct = function(pos)
