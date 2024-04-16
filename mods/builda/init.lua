@@ -157,7 +157,7 @@ minetest.register_item("builda:green", {
     type = "tool",
     on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            _G.insta.build("residential_green", 2, pointed_thing, user)
+            _G.insta.build("green", 2, pointed_thing, user)
         end
     end,
 })
@@ -289,9 +289,6 @@ minetest.register_item("builda:destroyer", {
                     maxexptime = 0.2,
                 })
                 minetest.sound_play("builda_explode", {pos = pos, max_hear_distance = 20})
-            else
-                minetest.sound_play("builda_error", {pos = pos, max_hear_distance = 20})
-                minetest.debug("Failed to remove node.")
             end
         end
     end
