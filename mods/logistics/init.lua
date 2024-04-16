@@ -224,8 +224,10 @@ end
 logistics.remove = function(pos, player) 
     local node = minetest.get_node(pos)
     local def = minetest.registered_nodes[node.name]
+    if not def.connects_to or not  def.logistics then
+        return false
+    end
     if def then
-        
         local group = string.match(def.connects_to, "group:(.*)")
         local network = def.logistics.network
 

@@ -55,7 +55,7 @@ local function print_details(item_name)
     end
 end
 
-local function build(building_type, max_level, pointed_thing, player)
+function _G.insta.build(building_type, max_level, pointed_thing, player)
     local pos = pointed_thing.under
     pos.y = 9
     local current = minetest.get_node(pos)
@@ -81,7 +81,7 @@ local function build(building_type, max_level, pointed_thing, player)
     end
 end
 
-local function unbuild(building_type, pointed_thing, player)
+function _G.insta.unbuild(building_type, pointed_thing, player)
     local pos = pointed_thing.under
     pos.y = 9
     local current = minetest.get_node(pos)
@@ -104,35 +104,4 @@ local function unbuild(building_type, pointed_thing, player)
             end
         end
     end
-end
-
-function insta.build_green(pointed_thing, builder)
-    build("green", 2, pointed_thing, builder)
-end
-
-function insta.build_residential_concrete(pointed_thing, builder)
-    build("residential_concrete", 4, pointed_thing, builder)
-end
-
-function insta.unbuild_residential_concrete(pointed_thing, builder)
-    unbuild("residential_concrete", pointed_thing, builder)
-end
-
-function insta.build_residential_brick(pointed_thing, builder)
-    build("residential_brick", 4, pointed_thing, builder)
-end
-
-
-function insta.unbuild_residential_brick(pointed_thing, builder)
-    unbuild("residential_brick", pointed_thing, builder)
-end
-
-
-function insta.build_residential_wood(pointed_thing, builder)
-    build("residential_wood", 2, pointed_thing, builder)
-end
-
-
-function insta.unbuild_residential_wood(pointed_thing, builder)
-    unbuild("residential_wood", pointed_thing, builder)
 end

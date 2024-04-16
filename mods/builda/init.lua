@@ -155,9 +155,9 @@ minetest.register_item("builda:green", {
     description = S("Green area in the city"),
     inventory_image = "nature.png",
     type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
+    on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            insta.build_green(pointed_thing, user)
+            _G.insta.build("residential_green", 2, pointed_thing, user)
         end
     end,
 })
@@ -174,14 +174,14 @@ minetest.register_item("builda:residential_concrete", {
     description = S("Residential Concrete House"),
     inventory_image = "house_concrete.png",
     type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
+    on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            insta.build_residential_concrete(pointed_thing, user)
+            _G.insta.build("residential_concrete", 4, pointed_thing, user)
         end
     end,
-    on_use = function(itemstack, user, pointed_thing)
+    on_use = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            insta.unbuild_residential_concrete(pointed_thing, user)
+            _G.insta.unbuild("residential_concrete", pointed_thing, user)
         end
     end
 
@@ -201,14 +201,14 @@ minetest.register_item("builda:residential_brick", {
     description = S("Residential Brick House"),
     inventory_image = "house_brick.png",
     type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
+    on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            insta.build_residential_brick(pointed_thing, user)
+            _G.insta.build("residential_brick", 4, pointed_thing, user)
         end
     end,
-    on_use = function(itemstack, user, pointed_thing)
+    on_use = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            insta.unbuild_residential_brick(pointed_thing, user)
+            _G.insta.unbuild("residential_brick", pointed_thing, user)
         end
     end
 })
@@ -227,14 +227,14 @@ minetest.register_item("builda:residential_wood", {
     description = S("Residential Wooden House"),
     inventory_image = "house_wood.png",
     type = "tool",
-    on_place = function(itemstack, user, pointed_thing)
+    on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            insta.build_residential_wood(pointed_thing, user)
+            _G.insta.build("residential_wood", 2, pointed_thing, user)
         end
     end,
-    on_use = function(itemstack, user, pointed_thing)
+    on_use = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            insta.unbuild_residential_wood(pointed_thing, user)
+            _G.insta.unbuild("residential_wood", pointed_thing, user)
         end
     end
 })
