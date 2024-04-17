@@ -201,12 +201,12 @@ function forms.showResultHUD(player)
     local imageFilePrefix = "screen_"
     local imageFile = "allSuccess.png"
 
-    local lackInPopulation = ((_G.insta.goal_population - player:get_meta():get_float("population")) * 100.0) 
-        /  _G.insta.goal_population
-    local excessInCo2 = ((player:get_meta():get_float("co2") - _G.insta.goal_co2) * 100) 
-        / _G.insta.goal_co2
-    local excessInCosts = ((player:get_meta():get_int("costs") - _G.insta.goal_costs) * 100) 
-        / _G.insta.goal_costs
+    local lackInPopulation = ((_G.status.goal_population - player:get_meta():get_float("population")) * 100.0) 
+        /  _G.status.goal_population
+    local excessInCo2 = ((player:get_meta():get_float("co2") - _G.status.goal_co2) * 100) 
+        / _G.status.goal_co2
+    local excessInCosts = ((player:get_meta():get_int("costs") - _G.status.goal_costs) * 100) 
+        / _G.status.goal_costs
     if lackInPopulation > excessInCo2 and lackInPopulation > excessInCo2 then
         if lackInPopulation > mediumFailureLimit then
             imageFile = "veryFewRoom.png"

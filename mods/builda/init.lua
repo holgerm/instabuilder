@@ -119,33 +119,6 @@ minetest.register_decoration({
 local street_cost = 75
 local street_co2 = 2
 
-local costs = {
-    green = { 20, 30, },
-    residential_concrete = { 300, 600, 1200, 2400,},
-    residential_brick = { 350, 700, 1400, 2800,},
-    residential_wood = { 400, 800, },
-}
-
-local co2 = {
-    green = { -80, -140, },
-    residential_concrete = { 100, 200, 400, 800, },
-    residential_brick = { 60, 120, 240, 480, },
-    residential_wood = { 20, 40, },
-}
-
-local population = {
-    green = { 0, 0, },
-    residential_concrete = { 4, 10, 40, 160, },
-    residential_brick = { 4, 10, 25, 60, },
-    residential_wood = { 4, 10, },
-}
-
-_G.builda.AddPoints = function(user, building_type, from_level, to_level)
-    _G.builda.AddPlayerCosts(user, (costs[building_type][to_level] or 0) - (costs[building_type][from_level] or 0))
-    _G.builda.AddPlayerCo2(user, (co2[building_type][to_level] or 0) - (co2[building_type][from_level] or 0))
-    _G.builda.AddPlayerPopulation(user, (population[building_type][to_level] or 0) - (population[building_type][from_level] or 0))
-end
-
 minetest.register_item("builda:road", {
     description = S("Road"),
     inventory_image = "builda_road.png",
@@ -155,7 +128,7 @@ minetest.register_item("builda:road", {
         if pointed_thing.type == "node" then
             if logistics.place("city:street_off", pointed_thing.above, user) then
                 _G.builda.AddPlayerCosts(user, street_cost)
-                _G.builda.AddPlayerCo2(user, street_co2)
+                _G.status.AddPlayerCo2(user, street_co2)
             end
         end
     end
@@ -235,8 +208,8 @@ minetest.register_item("builda:destroyer", {
             if item then
                 if thing.name == "city:street_off" then
                     _G.builda.AddPlayerCosts(user, -street_cost)
-                else
-                    _G.builda.AddPoints(user, item.kind, item.level, 0)
+                elseif item.kind and item.level then
+                    _G.status.AddPoints(user, item.kind, item.level, 0)
                 end
             end
 

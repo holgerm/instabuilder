@@ -60,7 +60,7 @@ function _G.insta.build(building_type, max_level, pointed_thing, player)
             return false
         else
             if logistics.place(city.buildings[building_type][1].."_off", pos, player) then
-                _G.builda.AddPoints(player, building_type, 0, 1)
+                _G.status.AddPoints(player, building_type, 0, 1)
             end
         end
     end
@@ -69,7 +69,7 @@ function _G.insta.build(building_type, max_level, pointed_thing, player)
     if current.name:sub(1,#("city:"..building_type)) == "city:"..building_type and
         item_def.level and item_def.level < max_level then
         if logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, player) then
-            _G.builda.AddPoints(player, building_type, item_def.level, item_def.level + 1)
+            _G.status.AddPoints(player, building_type, item_def.level, item_def.level + 1)
         end
     end
 end
@@ -89,11 +89,11 @@ function _G.insta.unbuild(building_type, pointed_thing, player)
     if current.name:sub(1,#("city:"..building_type)) == "city:"..building_type and item_def.level then
         if item_def.level > 1 then
             if logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, player) then
-                _G.builda.AddPoints(player, building_type, item_def.level, item_def.level - 1)
+                _G.status.AddPoints(player, building_type, item_def.level, item_def.level - 1)
             end
         elseif item_def.level == 1 then
             if logistics.remove(pos, player) then
-                _G.builda.AddPoints(player, building_type, item_def.level, 0)
+                _G.status.AddPoints(player, building_type, item_def.level, 0)
             end
         end
     end
