@@ -56,20 +56,20 @@ local function showHelpHUD(player, helptext)
             hud_elem_type = "image",
             position = image_position, --{x = 0.026, y = 0.0042},
             scale = {x = 0.8, y = 0.8} ,
-            text = "help_blank.png",
+            text = "tip_streets.png",
             alignment = {x = 0, y = 0},
         })
 
         -- Add the text
-        hud_id_help_text = player:hud_add({
-            hud_elem_type = "text",
-            position = image_position,
-            scale = 1,
-            size = {x = 2.6, y = 2.6},
-            text = helptext,
-            number = 0x000000,  -- Text color: black
-            alignment = {x = 0, y = 0},
-        })
+        -- hud_id_help_text = player:hud_add({
+        --     hud_elem_type = "text",
+        --     position = image_position,
+        --     scale = 1,
+        --     size = {x = 2.6, y = 2.6},
+        --     text = helptext,
+        --     number = 0x000000,  -- Text color: black
+        --     alignment = {x = 0, y = 0},
+        -- })
         hud_state.help = true
     end
 end
