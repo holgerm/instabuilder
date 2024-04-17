@@ -208,6 +208,7 @@ minetest.register_item("builda:destroyer", {
             if item then
                 if thing.name == "city:street_off" then
                     _G.builda.AddPlayerCosts(user, -street_cost)
+                    _G.status.AddPlayerCo2(user, -street_co2)
                 elseif item.kind and item.level then
                     _G.status.AddPoints(user, item.kind, item.level, 0)
                 end
