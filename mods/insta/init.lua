@@ -10,13 +10,6 @@ _G.insta = insta
 
 local build_time = 300 -- 5 minutes
 
-local goal_costs = 17000 -- less than is better
-local goal_co2 = 1000 -- less than is better
-local goal_population = 1000 -- more than is better
-_G.insta.goal_costs = goal_costs
-_G.insta.goal_co2 = goal_co2
-_G.insta.goal_population = goal_population
-
 local forms = dofile(minetest.get_modpath("insta").."/forms.lua")
 
 function insta.start_countdown()
@@ -67,7 +60,7 @@ function _G.insta.build(building_type, max_level, pointed_thing, player)
             return false
         else
             if logistics.place(city.buildings[building_type][1].."_off", pos, player) then
-                _G.builda.AddPoints4Green(player, 0, 1)
+                _G.builda.AddPoints(player, building_type, 0, 1)
             end
         end
     end
@@ -76,7 +69,7 @@ function _G.insta.build(building_type, max_level, pointed_thing, player)
     if current.name:sub(1,#("city:"..building_type)) == "city:"..building_type and
         item_def.level and item_def.level < max_level then
         if logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, player) then
-            _G.builda.AddPoints4Green(player, item_def.level, item_def.level + 1)
+            _G.builda.AddPoints(player, building_type, item_def.level, item_def.level + 1)
         end
     end
 end
@@ -96,11 +89,11 @@ function _G.insta.unbuild(building_type, pointed_thing, player)
     if current.name:sub(1,#("city:"..building_type)) == "city:"..building_type and item_def.level then
         if item_def.level > 1 then
             if logistics.place(city.buildings[building_type][item_def.level - 1].."_off", pos, player) then
-                _G.builda.AddPoints4Green(player, item_def.level, item_def.level - 1)
+                _G.builda.AddPoints(player, building_type, item_def.level, item_def.level - 1)
             end
         elseif item_def.level == 1 then
             if logistics.remove(pos, player) then
-                _G.builda.AddPoints4Green(player, item_def.level, 0)
+                _G.builda.AddPoints(player, building_type, item_def.level, 0)
             end
         end
     end

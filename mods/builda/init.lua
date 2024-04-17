@@ -49,8 +49,6 @@ minetest.register_on_joinplayer(function(player)
     player:hud_set_flags({healthbar=false, breathbar=false, wielditem=false})
     player:hud_set_hotbar_image("builda_empty.png")
 
-    -- _G.status.addStatusBar(player, "co2", 100)
-
     _G.builda.Init_status_hud(player)
     _G.builda.Reset_state()
 
@@ -121,20 +119,32 @@ minetest.register_decoration({
 local street_cost = 75
 local street_co2 = 2
 
-local green_cost = { 20, 30, }
-local green_co2 = { -80, -140, }
+local costs = {
+    green = { 20, 30, },
+    residential_concrete = { 300, 600, 1200, 2400,},
+    residential_brick = { 350, 700, 1400, 2800,},
+    residential_wood = { 400, 800, },
+}
 
-local residential_concrete_cost = { 300, 600, 1200, 2400,}
-local residential_concrete_co2 = { 100, 200, 400, 800, }
-local residential_concrete_population = { 4, 10, 40, 160 }
+local co2 = {
+    green = { -80, -140, },
+    residential_concrete = { 100, 200, 400, 800, },
+    residential_brick = { 60, 120, 240, 480, },
+    residential_wood = { 20, 40, },
+}
 
-local residential_brick_cost = { 350, 700, 1400, 2800,}
-local residential_brick_co2 = { 60, 120, 240, 480, }
-local residential_brick_population = { 4, 10, 25, 60 }
+local population = {
+    green = { 0, 0, },
+    residential_concrete = { 4, 10, 40, 160, },
+    residential_brick = { 4, 10, 25, 60, },
+    residential_wood = { 4, 10, },
+}
 
-local residential_wood_cost = { 400, 800, }
-local residential_wood_co2 = { 20, 40, }
-local residential_wood_population = { 4, 10, }
+_G.builda.AddPoints = function(user, building_type, from_level, to_level)
+    _G.builda.AddPlayerCosts(user, (costs[building_type][to_level] or 0) - (costs[building_type][from_level] or 0))
+    _G.builda.AddPlayerCo2(user, (co2[building_type][to_level] or 0) - (co2[building_type][from_level] or 0))
+    _G.builda.AddPlayerPopulation(user, (population[building_type][to_level] or 0) - (population[building_type][from_level] or 0))
+end
 
 minetest.register_item("builda:road", {
     description = S("Road"),
@@ -162,14 +172,6 @@ minetest.register_item("builda:green", {
     end,
 })
 
-local function AddPoints4Green(user, from_level, to_level) 
-    _G.builda.AddPlayerCosts(user, (green_cost[to_level] or 0) - (green_cost[from_level] or 0))
-    _G.builda.AddPlayerCo2(user, (green_co2[to_level] or 0) - (green_co2[from_level] or 0))
-end
-
-_G.builda.AddPoints4Green = AddPoints4Green
-
-
 minetest.register_item("builda:residential_concrete", {
     description = S("Residential Concrete House"),
     inventory_image = "house_concrete.png",
@@ -187,16 +189,6 @@ minetest.register_item("builda:residential_concrete", {
 
 })
 
-local function AddPoints4ResidentialConcrete(user, from_level, to_level)
-    _G.builda.AddPlayerCosts(user, (residential_concrete_cost[to_level] or 0) - (residential_concrete_cost[from_level] or 0))
-    _G.builda.AddPlayerCo2(user, (residential_concrete_co2[to_level] or 0) - (residential_concrete_co2[from_level] or 0))
-    _G.builda.AddPlayerPopulation(user, (residential_concrete_population[to_level] or 0) -
-        (residential_concrete_population[from_level] or 0))
-end
-
-_G.builda.AddPoints4ResidentialConcrete = AddPoints4ResidentialConcrete
-
-
 minetest.register_item("builda:residential_brick", {
     description = S("Residential Brick House"),
     inventory_image = "house_brick.png",
@@ -212,16 +204,6 @@ minetest.register_item("builda:residential_brick", {
         end
     end
 })
-
-local function AddPoints4ResidentialBrick(user, from_level, to_level) 
-    _G.builda.AddPlayerCosts(user, (residential_brick_cost[to_level] or 0) - (residential_brick_cost[from_level] or 0))
-    _G.builda.AddPlayerCo2(user, (residential_brick_co2[to_level] or 0) - (residential_brick_co2[from_level] or 0))
-    _G.builda.AddPlayerPopulation(user, (residential_brick_population[to_level] or 0) -
-        (residential_brick_population[from_level] or 0))
-end
-
-_G.builda.AddPoints4ResidentialBrick = AddPoints4ResidentialBrick
-
 
 minetest.register_item("builda:residential_wood", {
     description = S("Residential Wooden House"),
@@ -239,15 +221,6 @@ minetest.register_item("builda:residential_wood", {
     end
 })
 
-local function AddPoints4ResidentialWood(user, from_level, to_level) 
-    _G.builda.AddPlayerCosts(user, (residential_wood_cost[to_level] or 0) - (residential_wood_cost[from_level] or 0))
-    _G.builda.AddPlayerCo2(user, (residential_wood_co2[to_level] or 0) - (residential_wood_co2[from_level] or 0))
-    _G.builda.AddPlayerPopulation(user, (residential_wood_population[to_level] or 0) -
-        (residential_wood_population[from_level] or 0))
-end
-
-_G.builda.AddPoints4ResidentialWood = AddPoints4ResidentialWood
-
 --Destroyer is used to destroy built nodes such as roads and buildings.
 minetest.register_item("builda:destroyer", {
     description = S("Destroyer"),
@@ -262,14 +235,8 @@ minetest.register_item("builda:destroyer", {
             if item then
                 if thing.name == "city:street_off" then
                     _G.builda.AddPlayerCosts(user, -street_cost)
-                elseif item.kind == "green" then
-                    AddPoints4Green(user, 1, 0)
-                elseif item.kind == "residential_concrete" then
-                    AddPoints4ResidentialConcrete(user, item.level, 0)
-                elseif item.kind == "residential_brick" then
-                    AddPoints4ResidentialBrick(user, item.level, 0)
-                elseif item.kind == "residential_wood" then
-                    AddPoints4ResidentialWood(user, item.level, 0)
+                else
+                    _G.builda.AddPoints(user, item.kind, item.level, 0)
                 end
             end
 
