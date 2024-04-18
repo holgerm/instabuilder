@@ -9,16 +9,7 @@ local hudform = {
     "modal[]",
 }
 
-local hudhelpform = {
-    "formspec_version[4]",
-    "size[0.1,0.1]",
-    "position[10,10]",
-}
-
--- #################### HELP FLAGS, HUDS and FORMS ####################
-
 local hud_id_help_image
-local hud_id_help_text
 
 local hud_state = {
     wait = false,
@@ -29,7 +20,7 @@ local hud_state = {
 }
 
 
-local function showHelpHUD(player, helptext)
+local function showHelpHUD(player)
 
     local screen_width = 1920 -- get the screen's width
     local screen_height = 1080 -- get the screen's height
@@ -45,11 +36,6 @@ local function showHelpHUD(player, helptext)
         y = (distance_from_top + (help_image_height / 2)) / screen_height,
     }
 
-    local text_position = {
-        x = (distance_from_left + (0.5 * help_image_width) - 130) / screen_width,
-        y = (distance_from_top + (0.5 * help_image_height) - 72) / screen_height,
-    }
-
     if player then
         -- Add the image
         hud_id_help_image = player:hud_add({
@@ -60,16 +46,6 @@ local function showHelpHUD(player, helptext)
             alignment = {x = 0, y = 0},
         })
 
-        -- Add the text
-        -- hud_id_help_text = player:hud_add({
-        --     hud_elem_type = "text",
-        --     position = image_position,
-        --     scale = 1,
-        --     size = {x = 2.6, y = 2.6},
-        --     text = helptext,
-        --     number = 0x000000,  -- Text color: black
-        --     alignment = {x = 0, y = 0},
-        -- })
         hud_state.help = true
     end
 end
@@ -81,10 +57,6 @@ local function hideHelpHUD(player)
             minetest.after(0.5, function()
                 hud_state.help = false
             end)
-        end
-
-        if hud_id_help_text then
-            player:hud_remove(hud_id_help_text)
         end
     end
 end
@@ -124,7 +96,8 @@ minetest.register_globalstep(function()
             if not hud_state.help and not hud_state.intro and not hud_state.result and not hud_state.helpOverview then
                 hud_key_stroked()
 
-                forms.showHelpOverviewHUD(player)
+--                forms.showHelpOverviewHUD(player)
+                forms.ShowInfoTabs(player)
             end
         end
     end
@@ -149,7 +122,6 @@ end
 local help_default = {
     start = {
         show = 1,
-        text = "Am besten baust du erst\nein paar Strassen.\nDenn Gebäude müssen an\nStrassen liegen."
     }
 }
 
@@ -162,7 +134,7 @@ end
 function forms.show_help(player, flag)
     if help[flag] and help[flag].show > 0 then
         help[flag].show = help[flag].show - 1
-        showHelpHUD(player, help[flag].text)
+        showHelpHUD(player)
     end
 end
 
@@ -255,7 +227,7 @@ function forms.hideResultHUD(player)
 end
 
 function forms.showHelpOverviewHUD(player)
-    local imageFile = "screen_helpOverview.png"
+    local imageFile = "TabHilfe.png"
     if player then
         -- Add the image
         hud_id_image = player:hud_add({
@@ -283,6 +255,40 @@ function forms.hideHelpOverviewHUD(player)
             forms.show_help(player, "start")
         end)
     end
+end
+
+function forms.ShowInfoTabs(player) 
+    local current_tab = 1  -- The currently selected tab
+
+    local function show_formspec(tab)
+        local image = "TabHilfe.png"  -- The default image
+        if tab == 2 then
+            image = "TabAngaben.png"
+        elseif tab == 3 then
+            image = "TabLizenzen.png"
+        elseif tab == 4 then
+            image = "TabImpressum.png"
+        end
+
+        local formspec =
+            "size[14.8,11.7]" ..
+            "tabheader[0,0;tabs;Steuerung,Angaben,Lizenzen,Impressum;" .. tab .. ";true;false]" ..
+            "image[0.1,0.1;18,13.5;" .. image .. "]"
+
+        minetest.show_formspec(player:get_player_name(), "insta:info", formspec)
+    end
+
+    minetest.register_on_player_receive_fields(function(_user, formname, fields)
+        if formname == "insta:info" and fields.tabs then
+            local tab = tonumber(fields.tabs)
+            if tab and tab ~= current_tab then
+                current_tab = tab
+                show_formspec(tab)
+            end
+        end
+    end)
+
+    show_formspec(current_tab)
 end
 
 
