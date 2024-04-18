@@ -23,11 +23,7 @@ minetest.register_item(":", {
     range = 10,
 })
 
---We need to attach the Energy and Humans HUD counts.
---Humans is top left, Energy is top right.
 minetest.register_on_joinplayer(function(player)
-
-    --Give the player their starting coins.
     if player:get_meta():contains("costs") == false then
         _G.builda.AddPlayerCosts(player, 0)
     end
@@ -121,7 +117,7 @@ local street_co2 = 2
 
 minetest.register_item("builda:road", {
     description = S("Road"),
-    inventory_image = "builda_road.png",
+    inventory_image = "inventory_road.png",
     type = "tool",
     on_place = function(_itemstack, user, pointed_thing)
         _G.worksaver.update_area(pointed_thing.above)
@@ -136,7 +132,7 @@ minetest.register_item("builda:road", {
 
 minetest.register_item("builda:green", {
     description = S("Green area in the city"),
-    inventory_image = "nature.png",
+    inventory_image = "inventory_green.png",
     type = "tool",
     on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
@@ -147,7 +143,7 @@ minetest.register_item("builda:green", {
 
 minetest.register_item("builda:residential_concrete", {
     description = S("Residential Concrete House"),
-    inventory_image = "house_concrete.png",
+    inventory_image = "inventory_residential_concrete.png",
     type = "tool",
     on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
@@ -164,7 +160,7 @@ minetest.register_item("builda:residential_concrete", {
 
 minetest.register_item("builda:residential_brick", {
     description = S("Residential Brick House"),
-    inventory_image = "house_brick.png",
+    inventory_image = "inventory_residential_brick.png",
     type = "tool",
     on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
@@ -180,7 +176,7 @@ minetest.register_item("builda:residential_brick", {
 
 minetest.register_item("builda:residential_wood", {
     description = S("Residential Wooden House"),
-    inventory_image = "house_wood.png",
+    inventory_image = "inventory_residential_wood.png",
     type = "tool",
     on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
@@ -197,7 +193,7 @@ minetest.register_item("builda:residential_wood", {
 --Destroyer is used to destroy built nodes such as roads and buildings.
 minetest.register_item("builda:destroyer", {
     description = S("Destroyer"),
-    inventory_image = "builda_destroyer.png",
+    inventory_image = "inventory_destroyer.png",
     type = "tool",
     on_place = function(itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
@@ -235,5 +231,5 @@ minetest.register_item("builda:destroyer", {
     end
 })
 
-local modpath = minetest.get_modpath("builda")
-dofile(modpath.."/guide.lua")
+-- local modpath = minetest.get_modpath("builda")
+-- dofile(modpath.."/guide.lua")

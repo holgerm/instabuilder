@@ -253,10 +253,6 @@ _G.builda.Reset_state = function()
         show_bar_value(player, hud_id_population_bar, "population", _G.status.goal_population)
         player:get_meta():set_int("co2", 0)
         show_bar_value(player, hud_id_co2_bar, "costs", _G.status.goal_population)
-
-        -- player:hud_change(hud_id_costs, "text", 0 .. " / " .. _G.status.goal_costs)
-        -- player:hud_change(hud_id_population, "text", 0 .. " / " .. _G.status.goal_population)
-        -- player:hud_change(hud_id_co2, "text", 0 .. " / " .. _G.status.goal_co2)
     end
 end
 

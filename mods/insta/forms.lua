@@ -263,7 +263,7 @@ function forms.ShowInfoTabs(player)
     local function show_formspec(tab)
         local image = "TabHilfe.png"  -- The default image
         if tab == 2 then
-            image = "TabAngaben.png"
+            image = "TabWerte.png"
         elseif tab == 3 then
             image = "TabLizenzen.png"
         elseif tab == 4 then
@@ -272,7 +272,7 @@ function forms.ShowInfoTabs(player)
 
         local formspec =
             "size[14.8,11.7]" ..
-            "tabheader[0,0;tabs;Steuerung,Angaben,Lizenzen,Impressum;" .. tab .. ";true;false]" ..
+            "tabheader[0,0;tabs;Steuerung,Werte,Lizenzen,Impressum;" .. tab .. ";true;false]" ..
             "image[0.1,0.1;18,13.5;" .. image .. "]"
 
         minetest.show_formspec(player:get_player_name(), "insta:info", formspec)
