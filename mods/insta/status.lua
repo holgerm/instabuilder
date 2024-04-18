@@ -35,11 +35,11 @@ _G.status.goal_costs = 17000 -- less than is better
 _G.status.goal_co2 = 1000 -- less than is better
 _G.status.goal_population = 1000 -- more than is better
 
-local hud_id_costs
+-- local hud_id_costs
 local hud_id_costs_bar
-local hud_id_co2
+-- local hud_id_co2
 local hud_id_co2_bar
-local hud_id_population
+-- local hud_id_population
 local hud_id_population_bar
 local bar_length = 15
 local bar_value_per_unit = {
@@ -77,17 +77,17 @@ _G.builda.Init_status_hud = function(player)
         size = {x=48, y=48+5},
         offset = {x=5-(30 * bar_length), y=costY},
     })
-    -- Cost Count
-    hud_id_costs = player:hud_add({
-        name = "coins",
-        hud_elem_type = "text",
-        position = {x=1, y=0},
-        text = player:get_meta():get_int("costs") .. " / " .. _G.status.goal_costs,
-        number = 0xffffff,
-        size = {x=3, y=3},
-        offset = {x=-90, y=costY},
-        alignment = {x=-1, y=1},
-    })
+    -- -- Cost Count
+    -- hud_id_costs = player:hud_add({
+    --     name = "coins",
+    --     hud_elem_type = "text",
+    --     position = {x=1, y=0},
+    --     text = player:get_meta():get_int("costs") .. " / " .. _G.status.goal_costs,
+    --     number = 0xffffff,
+    --     size = {x=3, y=3},
+    --     offset = {x=-90, y=costY},
+    --     alignment = {x=-1, y=1},
+    -- })
 
     -- Co2 Icon
     local co2Y = 64+7
@@ -118,16 +118,16 @@ _G.builda.Init_status_hud = function(player)
         offset = {x=5-(30 * bar_length), y=co2Y},
     })
     -- Co2 Count
-    hud_id_co2 = player:hud_add({
-        name = "co2",
-        hud_elem_type = "text",
-        position = {x=1, y=0},
-        text = math.floor(player:get_meta():get_float("co2")+0.5) .. " / " .. _G.status.goal_co2,
-        number = 0xffffff,
-        size = {x=3, y=3+5},
-        offset = {x=-90, y=co2Y},
-        alignment = {x=-1, y=1},
-    })
+    -- hud_id_co2 = player:hud_add({
+    --     name = "co2",
+    --     hud_elem_type = "text",
+    --     position = {x=1, y=0},
+    --     text = math.floor(player:get_meta():get_float("co2")+0.5) .. " / " .. _G.status.goal_co2,
+    --     number = 0xffffff,
+    --     size = {x=3, y=3+5},
+    --     offset = {x=-90, y=co2Y},
+    --     alignment = {x=-1, y=1},
+    -- })
 
     -- Population Icon
     local populationY = 64+7+64
@@ -157,51 +157,51 @@ _G.builda.Init_status_hud = function(player)
         size = {x=48, y=48+5},
         offset = {x=5-(30 * bar_length), y=populationY},
     })
-    -- Population Count
-    hud_id_population = player:hud_add({
-        name = "population",
-        hud_elem_type = "text",
-        position = {x=1, y=0},
-        text = math.floor(player:get_meta():get_float("population")+0.5) .. " / " .. _G.status.goal_population,
-        number = 0xffffff,
-        size = {x=3, y=3+5},
-        offset = {x=-90, y=populationY},
-        alignment = {x=-1, y=1},
-    })
+    -- -- Population Count
+    -- hud_id_population = player:hud_add({
+    --     name = "population",
+    --     hud_elem_type = "text",
+    --     position = {x=1, y=0},
+    --     text = math.floor(player:get_meta():get_float("population")+0.5) .. " / " .. _G.status.goal_population,
+    --     number = 0xffffff,
+    --     size = {x=3, y=3+5},
+    --     offset = {x=-90, y=populationY},
+    --     alignment = {x=-1, y=1},
+    -- })
 end
 
 
 
 
-local function show_bar_value(player, hud_num_id, hud_bar_id, value_name, goal)
+local function show_bar_value(player, hud_bar_id, value_name, goal)
     local curValue = player:get_meta():get_int(value_name)
     if curValue < 0 then
         player:get_meta():set_int(value_name, 0)
         curValue = 0
     end
-    if hud_num_id then
-        player:hud_change(hud_num_id, "text", curValue ..
-            " / " .. goal)
-        local value_missing = goal - curValue
-        if (value_missing < 0) then
-            value_missing = 0
-        end
-        local curNumber = math.floor(value_missing / bar_value_per_unit[value_name])
-        if curNumber < 1 and value_missing > 0 then
-            curNumber = 1
-        end
-        if curValue < bar_value_per_unit[value_name] / 2 then
-            curNumber = bar_length -- fill completely if value is zero
-        end
-        player:hud_change(hud_bar_id, "number", curNumber)
+ --   if hud_num_id then
+    -- player:hud_change(hud_num_id, "text", curValue ..
+    --     " / " .. goal)
+    local value_missing = goal - curValue
+    if (value_missing < 0) then
+        value_missing = 0
     end
+    local curNumber = math.floor(value_missing / bar_value_per_unit[value_name])
+    if curNumber < 1 and value_missing > 0 then
+        curNumber = 1
+    end
+    if curValue < bar_value_per_unit[value_name] / 2 then
+        curNumber = bar_length -- fill completely if value is zero
+    end
+    player:hud_change(hud_bar_id, "number", curNumber)
+ --   end
     return true
 end
 
 --returns true if the player can afford.
 local AddPlayerCosts = function(player, coins)
     player:get_meta():set_int("costs", player:get_meta():get_int("costs") + coins);
-    show_bar_value(player, hud_id_costs, hud_id_costs_bar, "costs", _G.status.goal_costs)
+    show_bar_value(player, hud_id_costs_bar, "costs", _G.status.goal_costs)
 
     -- if player:get_meta():get_int("costs") < 0 then
     --     player:get_meta():set_int("costs", 0)
@@ -228,14 +228,14 @@ _G.builda.AddPlayerCosts = AddPlayerCosts
 
 local addPlayerCo2 = function(player, delta)
     player:get_meta():set_int("co2", player:get_meta():get_int("co2") + delta);
-    show_bar_value(player, hud_id_co2, hud_id_co2_bar, "co2", _G.status.goal_co2)
+    show_bar_value(player, hud_id_co2_bar, "co2", _G.status.goal_co2)
 end
 
 _G.status.AddPlayerCo2 = addPlayerCo2
 
 local addPlayerPopulation = function(player, delta)
     player:get_meta():set_int("population", player:get_meta():get_int("population") + delta);
-    show_bar_value(player, hud_id_population, hud_id_population_bar, "population", _G.status.goal_population)
+    show_bar_value(player, hud_id_population_bar, "population", _G.status.goal_population)
 end
 
 _G.status.AddPoints = function(user, building_type, from_level, to_level)
@@ -247,13 +247,16 @@ end
 _G.builda.Reset_state = function()
     for _, player in ipairs(minetest.get_connected_players()) do
         player:get_meta():set_int("costs", 0)
-        player:get_meta():set_int("population", 0)
-        show_bar_value(player, hud_id_population, hud_id_population_bar, "population", _G.status.goal_population)
-        player:get_meta():set_int("co2", 0)
+        show_bar_value(player, hud_id_costs_bar, "costs", _G.status.goal_population)
 
-        player:hud_change(hud_id_costs, "text", 0 .. " / " .. _G.status.goal_costs)
-        player:hud_change(hud_id_population, "text", 0 .. " / " .. _G.status.goal_population)
-        player:hud_change(hud_id_co2, "text", 0 .. " / " .. _G.status.goal_co2)
+        player:get_meta():set_int("population", 0)
+        show_bar_value(player, hud_id_population_bar, "population", _G.status.goal_population)
+        player:get_meta():set_int("co2", 0)
+        show_bar_value(player, hud_id_co2_bar, "costs", _G.status.goal_population)
+
+        -- player:hud_change(hud_id_costs, "text", 0 .. " / " .. _G.status.goal_costs)
+        -- player:hud_change(hud_id_population, "text", 0 .. " / " .. _G.status.goal_population)
+        -- player:hud_change(hud_id_co2, "text", 0 .. " / " .. _G.status.goal_co2)
     end
 end
 
