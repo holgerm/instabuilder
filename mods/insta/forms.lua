@@ -13,14 +13,14 @@ local hud_id_help_image
 
 local hud_state = {
     wait = false,
-    help = false,
+    tipp = false,
     helpOverview = false,
     intro = false,
     result = false,
 }
 
 
-local function showHelpHUD(player)
+local function showTippHUD(player, tippName)
 
     local screen_width = 1920 -- get the screen's width
     local screen_height = 1080 -- get the screen's height
@@ -42,20 +42,20 @@ local function showHelpHUD(player)
             hud_elem_type = "image",
             position = image_position, --{x = 0.026, y = 0.0042},
             scale = {x = 0.8, y = 0.8} ,
-            text = "tip_streets.png",
+            text = "tipp_" .. tippName .. ".png",
             alignment = {x = 0, y = 0},
         })
 
-        hud_state.help = true
+        hud_state.tipp = true
     end
 end
 
-local function hideHelpHUD(player)
+local function hideTippHUD(player)
     if player then
         if hud_id_help_image then
             player:hud_remove(hud_id_help_image)
             minetest.after(0.5, function()
-                hud_state.help = false
+                hud_state.tipp = false
             end)
         end
     end
@@ -77,9 +77,9 @@ minetest.register_globalstep(function()
             if hud_state.wait then
                 return
             end
-            if hud_state.help then
+            if hud_state.tipp then
                 hud_key_stroked()
-                hideHelpHUD(player)
+                hideTippHUD(player)
             end
             if hud_state.intro then
                 hud_key_stroked()
@@ -93,7 +93,7 @@ minetest.register_globalstep(function()
                 hud_key_stroked()
                 forms.hideHelpOverviewHUD(player)
             end
-            if not hud_state.help and not hud_state.intro and not hud_state.result and not hud_state.helpOverview then
+            if not hud_state.tipp and not hud_state.intro and not hud_state.result and not hud_state.helpOverview then
                 hud_key_stroked()
 
 --                forms.showHelpOverviewHUD(player)
@@ -120,8 +120,8 @@ local function deepcopy(orig)
 end
 
 local help_default = {
-    start = {
-        show = 1,
+    streets = {
+        show = 3,
     }
 }
 
@@ -131,10 +131,10 @@ local function reset_help()
     help = deepcopy(help_default)
 end
 
-function forms.show_help(player, flag)
+function forms.ShowTipp(player, flag)
     if help[flag] and help[flag].show > 0 then
         help[flag].show = help[flag].show - 1
-        showHelpHUD(player)
+        showTippHUD(player, flag)
     end
 end
 
@@ -159,11 +159,6 @@ function forms.hideIntroHUD(player)
             player:hud_remove(hud_id_image)
             hud_state.intro = false
         end
-
-
-        minetest.after(5, function()
-            forms.show_help(player, "start")
-        end)
     end
 end
 
@@ -202,7 +197,7 @@ function forms.showResultHUD(player)
     end
 
     if player then
-        hideHelpHUD(player)
+        hideTippHUD(player)
 
         -- Add the image
         hud_id_image = player:hud_add({
@@ -249,11 +244,6 @@ function forms.hideHelpOverviewHUD(player)
                 hud_state.helpOverview = false
             end)
         end
-
-
-        minetest.after(5, function()
-            forms.show_help(player, "start")
-        end)
     end
 end
 
@@ -309,9 +299,9 @@ minetest.register_on_player_receive_fields(function(player, formname, _fields)
         end)
     end
 
-    if (formname == "insta:help") then
-        hideHelpHUD(player)
-    end
+ --   if (formname == "insta:help") then
+ --       hideTippHUD(player)
+ --   end
 
     if (formname == "insta:helpOverview") then
         forms.hideHelpOverviewHUD(player)

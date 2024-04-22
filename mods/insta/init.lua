@@ -57,6 +57,7 @@ function _G.insta.build(building_type, max_level, pointed_thing, player)
     if current.name == "air" then
         local road = logistics.node_near(pos, player, "street")
         if not road then
+            forms.ShowTipp(player, "streets")
             return false
         else
             if logistics.place(city.buildings[building_type][1].."_off", pos, player) then
