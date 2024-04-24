@@ -117,24 +117,25 @@ local function deepcopy(orig)
     return copy
 end
 
-local help_default = {
+_G.forms.help = {
     streets = {
         show = 3,
     },
     level_up = {
+        after = 20,
         show = 1,
     }
 }
 
-local help = deepcopy(help_default)
+local _help = deepcopy(_G.forms.help)
 
 local function reset_help()
-    help = deepcopy(help_default)
+    _help = deepcopy(_G.forms.help)
 end
 
 function _G.forms.ShowTipp(player, tippName)
-    if help[tippName] and help[tippName].show > 0 then
-        help[tippName].show = help[tippName].show - 1
+    if _help[tippName] and _help[tippName].show > 0 then
+        _help[tippName].show = _help[tippName].show - 1
         showTippHUD(player, tippName)
     end
 end
@@ -159,11 +160,6 @@ function _G.forms.hideIntroHUD(player)
 
     player:hud_remove(hud_id_image)
     hud_state.intro = false
-    minetest.after(20, function()
-        if _G.status.hasBuilt and not _G.status.hasLeveledUp then
-            _G.forms.ShowTipp(player, "level_up")
-        end
-    end)
 end
 
 function _G.forms.showResultHUD(player)
@@ -172,11 +168,11 @@ function _G.forms.showResultHUD(player)
     local imageFilePrefix = "screen_"
     local imageFile = "allSuccess.png"
 
-    local lackInPopulation = ((_G.status.goal_population - player:get_meta():get_float("population")) * 100.0) 
+    local lackInPopulation = ((_G.status.goal_population - player:get_meta():get_float("population")) * 100.0)
         /  _G.status.goal_population
-    local excessInCo2 = ((player:get_meta():get_float("co2") - _G.status.goal_co2) * 100) 
+    local excessInCo2 = ((player:get_meta():get_float("co2") - _G.status.goal_co2) * 100)
         / _G.status.goal_co2
-    local excessInCosts = ((player:get_meta():get_int("costs") - _G.status.goal_costs) * 100) 
+    local excessInCosts = ((player:get_meta():get_int("costs") - _G.status.goal_costs) * 100)
         / _G.status.goal_costs
     if lackInPopulation > excessInCo2 and lackInPopulation > excessInCo2 then
         if lackInPopulation > mediumFailureLimit then
@@ -251,7 +247,7 @@ function _G.forms.hideHelpOverviewHUD(player)
     end
 end
 
-function _G.forms.ShowInfoTabs(player) 
+function _G.forms.ShowInfoTabs(player)
     local current_tab = 1  -- The currently selected tab
 
     local function show_formspec(tab)

@@ -63,6 +63,11 @@ function _G.insta.build(building_type, max_level, pointed_thing, player)
             if logistics.place(city.buildings[building_type][1].."_off", pos, player) then
                 _G.status.AddPoints(player, building_type, 0, 1)
                 _G.status.hasBuilt = true -- for tipps
+                minetest.after(_G.forms.help.level_up.after or 20, function()
+                    if _G.status.hasBuilt and not _G.status.hasLeveledUp then
+                        _G.forms.ShowTipp(player, "level_up")
+                    end
+                end)
             end
         end
     end
