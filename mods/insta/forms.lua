@@ -124,7 +124,11 @@ _G.forms.help = {
     level_up = {
         after = 20,
         show = 1,
-    }
+    },
+    point_at = {
+        after = 10,
+        show = 1,
+    },
 }
 
 local _help = deepcopy(_G.forms.help)
@@ -160,6 +164,12 @@ function _G.forms.hideIntroHUD(player)
 
     player:hud_remove(hud_id_image)
     hud_state.intro = false
+    minetest.after(_G.forms.help.point_at.after or 10, function()
+        if not _G.status.hasBuilt then
+            _G.forms.ShowTipp(player, "point_at")
+        end
+    end)
+
 end
 
 function _G.forms.showResultHUD(player)
