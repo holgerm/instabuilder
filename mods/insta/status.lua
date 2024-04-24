@@ -35,6 +35,9 @@ _G.status.goal_costs = 17000 -- less than is better
 _G.status.goal_co2 = 1000 -- less than is better
 _G.status.goal_population = 1000 -- more than is better
 
+_G.status.hasBuilt = false
+_G.status.hasLeveledUp = false
+
 -- local hud_id_costs
 local hud_id_costs_bar
 -- local hud_id_co2

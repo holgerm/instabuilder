@@ -1,4 +1,4 @@
-local forms = {}
+_G.forms = {}
 
 local hud_id_image
 
@@ -83,21 +83,19 @@ minetest.register_globalstep(function()
             end
             if hud_state.intro then
                 hud_key_stroked()
-                forms.hideIntroHUD(player)
+                _G.forms.hideIntroHUD(player)
             end
             if hud_state.result then
                 hud_key_stroked()
-                forms.hideResultHUD(player)
+                _G.forms.hideResultHUD(player)
             end
             if hud_state.helpOverview then
                 hud_key_stroked()
-                forms.hideHelpOverviewHUD(player)
+                _G.forms.hideHelpOverviewHUD(player)
             end
             if not hud_state.tipp and not hud_state.intro and not hud_state.result and not hud_state.helpOverview then
                 hud_key_stroked()
-
---                forms.showHelpOverviewHUD(player)
-                forms.ShowInfoTabs(player)
+                _G.forms.ShowInfoTabs(player)
             end
         end
     end
@@ -122,6 +120,9 @@ end
 local help_default = {
     streets = {
         show = 3,
+    },
+    level_up = {
+        show = 1,
     }
 }
 
@@ -131,15 +132,15 @@ local function reset_help()
     help = deepcopy(help_default)
 end
 
-function forms.ShowTipp(player, flag)
-    if help[flag] and help[flag].show > 0 then
-        help[flag].show = help[flag].show - 1
-        showTippHUD(player, flag)
+function _G.forms.ShowTipp(player, tippName)
+    if help[tippName] and help[tippName].show > 0 then
+        help[tippName].show = help[tippName].show - 1
+        showTippHUD(player, tippName)
     end
 end
 
 
-function forms.showIntroHUD(player)
+function _G.forms.showIntroHUD(player)
     local imageFile = "screen_start.png"
     if player then
         -- Add the image
@@ -153,16 +154,19 @@ function forms.showIntroHUD(player)
     end
 end
 
-function forms.hideIntroHUD(player)
-    if player then
-        if hud_id_image then
-            player:hud_remove(hud_id_image)
-            hud_state.intro = false
+function _G.forms.hideIntroHUD(player)
+    if not player or not hud_id_image then return end
+
+    player:hud_remove(hud_id_image)
+    hud_state.intro = false
+    minetest.after(20, function()
+        if _G.status.hasBuilt and not _G.status.hasLeveledUp then
+            _G.forms.ShowTipp(player, "level_up")
         end
-    end
+    end)
 end
 
-function forms.showResultHUD(player)
+function _G.forms.showResultHUD(player)
     -- select the appropriate image
     local mediumFailureLimit = 25.0 -- percent deviation in wrong direction
     local imageFilePrefix = "screen_"
@@ -211,7 +215,7 @@ function forms.showResultHUD(player)
     end
 end
 
-function forms.hideResultHUD(player)
+function _G.forms.hideResultHUD(player)
     if player then
         if hud_id_image then
             player:hud_remove(hud_id_image)
@@ -221,7 +225,7 @@ function forms.hideResultHUD(player)
     end
 end
 
-function forms.showHelpOverviewHUD(player)
+function _G.forms.showHelpOverviewHUD(player)
     local imageFile = "TabHilfe.png"
     if player then
         -- Add the image
@@ -236,7 +240,7 @@ function forms.showHelpOverviewHUD(player)
     end
 end
 
-function forms.hideHelpOverviewHUD(player)
+function _G.forms.hideHelpOverviewHUD(player)
     if player then
         if hud_id_image then
             player:hud_remove(hud_id_image)
@@ -247,7 +251,7 @@ function forms.hideHelpOverviewHUD(player)
     end
 end
 
-function forms.ShowInfoTabs(player) 
+function _G.forms.ShowInfoTabs(player) 
     local current_tab = 1  -- The currently selected tab
 
     local function show_formspec(tab)
@@ -289,13 +293,13 @@ minetest.register_on_player_receive_fields(function(player, formname, _fields)
         _G.worksaver.Reset_world()
         reset_help()
         _G.insta.start_countdown()
-        forms.hideIntroHUD(player)
+        _G.forms.hideIntroHUD(player)
     end
 
     if (formname == "insta:result") then
-        forms.hideResultHUD(player)
+        _G.forms.hideResultHUD(player)
         minetest.after(0.1, function()
-            forms.showIntroHUD(player)
+            _G.forms.showIntroHUD(player)
         end)
     end
 
@@ -304,8 +308,8 @@ minetest.register_on_player_receive_fields(function(player, formname, _fields)
  --   end
 
     if (formname == "insta:helpOverview") then
-        forms.hideHelpOverviewHUD(player)
+        _G.forms.hideHelpOverviewHUD(player)
     end
 end)
 
-return forms
+return _G.forms

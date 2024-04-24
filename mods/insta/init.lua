@@ -57,11 +57,12 @@ function _G.insta.build(building_type, max_level, pointed_thing, player)
     if current.name == "air" then
         local road = logistics.node_near(pos, player, "street")
         if not road then
-            forms.ShowTipp(player, "streets")
+            _G.forms.ShowTipp(player, "streets")
             return false
         else
             if logistics.place(city.buildings[building_type][1].."_off", pos, player) then
                 _G.status.AddPoints(player, building_type, 0, 1)
+                _G.status.hasBuilt = true -- for tipps
             end
         end
     end
@@ -71,6 +72,7 @@ function _G.insta.build(building_type, max_level, pointed_thing, player)
         item_def.level and item_def.level < max_level then
         if logistics.place(city.buildings[building_type][item_def.level + 1].."_off", pos, player) then
             _G.status.AddPoints(player, building_type, item_def.level, item_def.level + 1)
+            _G.status.hasLeveledUp = true -- for tipps
         end
     end
 end
