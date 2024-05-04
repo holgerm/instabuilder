@@ -21,6 +21,11 @@ local hud_state = {
 
 
 local function showTippHUD(player, tippName)
+    if hud_id_help_image then
+        -- remove any other hud tipp shown currently:
+        player:hud_remove(hud_id_help_image)
+    end
+
 
     local screen_width = 1920 -- get the screen's width
     local screen_height = 1080 -- get the screen's height
