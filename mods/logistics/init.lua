@@ -223,6 +223,8 @@ end
 -- player is the player who is removing the logistics node.
 logistics.remove = function(pos, player) 
     local node = minetest.get_node(pos)
+    _G.util.PrintTable(node)
+
     local def = minetest.registered_nodes[node.name]
     if not def.connects_to or not  def.logistics then
         return false
@@ -233,7 +235,12 @@ logistics.remove = function(pos, player)
 
         local adjacent = logistics.node_near(pos, player, group)
         if not adjacent then
-            return false
+            if node.name == 'city:street' then
+                return false
+            else
+                minetest.remove_node(pos)
+                return true
+            end
         end
 
         -- either fetch the index, or create a new one.

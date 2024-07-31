@@ -197,6 +197,24 @@ city.register_building("city:green_2", {
 		fixed = {-.5, -.5, -.3, .5, .15, .4},
 		},
 })
+city.register_building("city:green_3", {
+    height = 0.6,
+    mesh = "green_3",
+    tiles = {"green_3.png"},
+    drawtype = "mesh",
+    use_texture_alpha = true,
+    backface_culling = false,
+    kind = "green",
+    level = 3,
+	selection_box = {
+		type = 'fixed',
+		fixed = {-.5, -.5, -.3, .5, .15, .4},
+		},
+	collision_box = {
+		type = 'fixed',
+		fixed = {-.5, -.5, -.3, .5, .15, .4},
+		},
+})
 city.register_building("city:residential_concrete_1", {
     height = 1 ,
     mesh = "residential_concrete_1",

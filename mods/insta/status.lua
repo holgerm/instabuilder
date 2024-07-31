@@ -9,21 +9,21 @@ _G.status.ShowInfo = show_info
 dofile(minetest.get_modpath("insta").."/util.lua")
 
 local costs = {
-    green = { 20, 30, },
+    green = { 20, 30, 50,},
     residential_concrete = { 300, 600, 1200, 2400,},
     residential_brick = { 350, 700, 1400, 2800,},
     residential_wood = { 400, 800, },
 }
 
 local co2 = {
-    green = { -80, -140, },
+    green = { -80, -140, -250,},
     residential_concrete = { 100, 200, 400, 800, },
     residential_brick = { 60, 120, 240, 480, },
     residential_wood = { 20, 40, },
 }
 
 local population = {
-    green = { 0, 0, },
+    green = { 0, 0, 0, },
     residential_concrete = { 4, 10, 40, 160, },
     residential_brick = { 4, 10, 25, 60, },
     residential_wood = { 4, 10, },
@@ -31,9 +31,9 @@ local population = {
 
 
 
-_G.status.goal_costs = 17000 -- less than is better
-_G.status.goal_co2 = 1000 -- less than is better
-_G.status.goal_population = 1000 -- more than is better
+_G.status.goal_costs = 17000 -- should be less
+_G.status.goal_co2 = 1000 -- should be less
+_G.status.goal_population = 1000 -- more
 
 _G.status.hasBuilt = false
 _G.status.hasLeveledUp = false

@@ -136,7 +136,7 @@ minetest.register_item("builda:green", {
     type = "tool",
     on_place = function(_itemstack, user, pointed_thing)
         if pointed_thing.type == "node" then
-            _G.insta.build("green", 2, pointed_thing, user)
+            _G.insta.build("green", 3, pointed_thing, user)
         end
     end,
 })
