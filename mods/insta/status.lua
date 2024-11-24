@@ -10,8 +10,8 @@ dofile(minetest.get_modpath("insta").."/util.lua")
 
 local costs = {
     green = { 20, 30, 50,},
-    residential_concrete = { 300, 600, 1200, 2400,},
-    residential_brick = { 350, 700, 1400, 2800,},
+    residential_concrete = { 300, 600, 1000, 2000,},
+    residential_brick = { 350, 700, 1200, 2500,},
     residential_wood = { 400, 800, },
 }
 
@@ -24,9 +24,9 @@ local co2 = {
 
 local population = {
     green = { 0, 0, 0, },
-    residential_concrete = { 4, 10, 40, 160, },
-    residential_brick = { 4, 10, 25, 60, },
-    residential_wood = { 4, 10, },
+    residential_concrete = { 4, 15, 40, 160, },
+    residential_brick = { 4, 12, 25, 60, },
+    residential_wood = { 6, 20, },
 }
 
 
